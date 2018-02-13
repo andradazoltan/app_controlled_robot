@@ -1,3 +1,27 @@
+/**
+ * CPEN 291 Project 1
+ * WHEELZ
+ *
+ * Usage: 
+ * void turn90Deg(int dir);
+ * 			Rotates on the spot
+ * 			- dir is the direction. (LEFT, RIGHT)
+ * void straight(int v);
+ * 			Moves straight
+ * 			- v is speed. (0 to 255) in PWM
+ * void smoothTurn(double radius, int dir, int v);
+ * 			Turns in a circular arc.
+ * 			- radius is radius of inner wheel (0cm to large)
+ * 			- v is speed of outer wheel. (0 to 255) in PWM
+ * 			- dir is direction of turn. (LEFT, RIGHT)
+ * void setDirection(int dir);
+ * 			flips the direction of movement until setDirection is called again
+ * 			- dir is the direction of the movement. (FORWARD, BACKWARD)
+ * void slowDown(int dist);
+ * 			Slows to a stop in front of the obstacle, no effect if dist > 50cm
+ * 			- dist is the distance to the obstacle
+ */
+
 //Arduino PWM Speed Control:
 int E1 = 5;  
 int M1 = 4; 
