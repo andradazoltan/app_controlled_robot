@@ -29,6 +29,7 @@ void processIR(){
       break;
     case 0:
       Serial.println("white");
+      //add moving forward code here
       break;
     default: break;
   }
@@ -43,6 +44,7 @@ void processIR(){
       break;
     case 0:
       Serial.println("white");
+      //add moving forward code here
       break;
     default: break;
   }
