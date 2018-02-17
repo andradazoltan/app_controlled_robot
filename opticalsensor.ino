@@ -24,7 +24,7 @@ void processIR(){
     case 1:
       Serial.println("black");
       while (IRVal_1==1){
-        smoothTurn(1,1,what);
+        smoothTurn(1,LEFT,MAX_PWM);
       }
       break;
     case 0:
@@ -39,7 +39,7 @@ void processIR(){
     case 1:
       Serial.println("black");
       while (IRVal_2==1){
-        smoothTurn(1,1,what);
+        smoothTurn(1,LEFT,MAX_PWM);
       }
       break;
     case 0:
