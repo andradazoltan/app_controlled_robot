@@ -3,9 +3,13 @@
  * WHEELZ
  *
  * Usage: 
- * void turn90Deg(int dir);
+ * void turn90Deg(int dir); [deprecated]
+ * 			Rotates on the spot by 90 degrees
+ * 			- dir is the direction. (LEFT, RIGHT)
+ * void rotate(int dir, int v);
  * 			Rotates on the spot
  * 			- dir is the direction. (LEFT, RIGHT)
+ * 			- v is speed. (0 to 255) in PWM
  * void straight(int v);
  * 			Moves straight
  * 			- v is speed. (0 to 255) in PWM
@@ -17,9 +21,11 @@
  * void setDirection(int dir);
  * 			flips the direction of movement until setDirection is called again
  * 			- dir is the direction of the movement. (FORWARD, BACKWARD)
- * void slowDown(int dist);
+ * void slowDown(int dist, int v);
  * 			Slows to a stop in front of the obstacle, no effect if dist > 50cm
+ * 			Note: only edits PWM
  * 			- dist is the distance to the obstacle
+ * 			- v is the max speed at dist > 50cm. (0 to 255) in PWM
  */
 
 //Arduino PWM Speed Control:
@@ -49,60 +55,60 @@ void setDirection(int dir);
 void straight(int velociraptor);
 
 void wheel_setup() {
-    pinMode(M1, OUTPUT);   
-    pinMode(M2, OUTPUT); 
-    Serial.begin(9600);
+	pinMode(M1, OUTPUT);   
+	pinMode(M2, OUTPUT); 
+	Serial.begin(9600);
 }
 
 void wheel_loop() {
-    straight(0); delay(5000);
-    smoothTurn(15, LEFT, MAX_PWM);
-    delay(FIG8);
-    smoothTurn(15, RIGHT, MAX_PWM);
-    delay(FIG8);
-    straight(0); delay(5000);
-    
-    straight(MAX_PWM);
-    delay(1000);
-    smoothTurn(0, LEFT, MAX_PWM);
-    delay(SQRTURN);
-    straight(MAX_PWM);
-    delay(2000);
-    smoothTurn(0, LEFT, MAX_PWM);
-    delay(SQRTURN);
-    straight(MAX_PWM);
-    delay(2000);
-    smoothTurn(0, LEFT, MAX_PWM);
-    delay(SQRTURN);
-    straight(MAX_PWM);
-    delay(2000);
-    smoothTurn(0, LEFT, MAX_PWM);
-    delay(SQRTURN);
-    straight(MAX_PWM);
-    delay(2000);
-    smoothTurn(0, RIGHT, MAX_PWM);
-    delay(SQRTURN);
-    straight(MAX_PWM);
-    delay(2000);
-    smoothTurn(0, RIGHT, MAX_PWM);
-    delay(SQRTURN);
-    straight(MAX_PWM);
-    delay(2000);
-    smoothTurn(0, RIGHT, MAX_PWM);
-    delay(SQRTURN);
-    straight(MAX_PWM);
-    delay(2000);
-    smoothTurn(0, RIGHT, MAX_PWM);
-    delay(SQRTURN);
-    straight(MAX_PWM);
-    delay(1000);
+	straight(0); delay(5000);
+	smoothTurn(15, LEFT, MAX_PWM);
+	delay(FIG8);
+	smoothTurn(15, RIGHT, MAX_PWM);
+	delay(FIG8);
+	straight(0); delay(5000);
+
+	straight(MAX_PWM);
+	delay(1000);
+	smoothTurn(0, LEFT, MAX_PWM);
+	delay(SQRTURN);
+	straight(MAX_PWM);
+	delay(2000);
+	smoothTurn(0, LEFT, MAX_PWM);
+	delay(SQRTURN);
+	straight(MAX_PWM);
+	delay(2000);
+	smoothTurn(0, LEFT, MAX_PWM);
+	delay(SQRTURN);
+	straight(MAX_PWM);
+	delay(2000);
+	smoothTurn(0, LEFT, MAX_PWM);
+	delay(SQRTURN);
+	straight(MAX_PWM);
+	delay(2000);
+	smoothTurn(0, RIGHT, MAX_PWM);
+	delay(SQRTURN);
+	straight(MAX_PWM);
+	delay(2000);
+	smoothTurn(0, RIGHT, MAX_PWM);
+	delay(SQRTURN);
+	straight(MAX_PWM);
+	delay(2000);
+	smoothTurn(0, RIGHT, MAX_PWM);
+	delay(SQRTURN);
+	straight(MAX_PWM);
+	delay(2000);
+	smoothTurn(0, RIGHT, MAX_PWM);
+	delay(SQRTURN);
+	straight(MAX_PWM);
+	delay(1000);
 }
 
 //set PWM to control speed of wheels
 void setPWM(int velociraptor) {
-    cur_pwm = velociraptor;
-    analogWrite(E1, velociraptor);
-    analogWrite(E2, velociraptor);
+	cur_pwm = velociraptor;
+	analogWrite(E1, velociraptor);
+	analogWrite(E2, velociraptor);
 }
 
 // rotate on spot
@@ -112,24 +118,24 @@ void rotate(int dir, int val) {
   setPWM(val);
 }
 
-//turn LEFT or RIGHT by 90 degrees
-void turn90Deg(int dir){
-    digitalWrite(M1, dir);
-    digitalWrite(M2, dir);
-    //may need to change values
-    setPWM(175);
-    delay(1000);
-    setPWM(0);
+//turn LEFT or RIGHT by 90 degrees [deprecated]
+void turn90Deg(int dir){ 
+	digitalWrite(M1, dir);
+	digitalWrite(M2, dir);
+	//may need to change values
+	setPWM(175);
+	delay(1000);
+	setPWM(0);
 }
 
 // 50cm --> MAX_PWM
 // 10cm --> 0
-void slowDown(int dist){
+void slowDown(int dist, int velociraptor){
   if (dist > 50) {
-    setPWM(MAX_PWM);
+    setPWM(velociraptor);
   } 
   else {
-    setPWM(MAX_PWM * (dist-10) / 40);
+    setPWM(velociraptor * (dist-10) / 40);
   }
 }
 
