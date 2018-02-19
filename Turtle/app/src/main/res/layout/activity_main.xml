@@ -18,7 +18,8 @@
         android:text="Connect"
         android:textAllCaps="false"
         android:textColor="#fff"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:layout_margin="10dp"/>
 
     <TextView
         android:id="@+id/loading_txt"
@@ -28,12 +29,24 @@
         android:text="Launching gyroscope sensor..."
         android:textColor="#fff"
         android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/bluetoothbtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:background="@drawable/bluetooth_btn"
+        android:text="Bluetooth"
+        android:textAllCaps="false"
+        android:textColor="#fff"
+        android:textSize="20sp" />
+
     <ProgressBar
         android:id="@+id/progressBar"
-        android:progressDrawable="@drawable/circular_progress_bar"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingTop="150dp" />
+        android:paddingTop="150dp"
+        android:progressDrawable="@drawable/circular_progress_bar" />
 
 </LinearLayout>

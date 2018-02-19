@@ -5,9 +5,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -18,17 +19,21 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity {
-    LinearLayout mainLayout;
-    AnimationDrawable animationbg;
-    Button connectBtn;
-    ProgressBar spinner;
-    ValueAnimator animator;
-    TextView loading_txt;
+    private LinearLayout mainLayout;
+    private AnimationDrawable animationbg;
+    private Button connectBtn;
+    private ProgressBar spinner;
+    private ValueAnimator animator;
+    private TextView loading_txt;
+    private Button bluetoothBtn;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         loading_txt=(TextView) findViewById(R.id.loading_txt);
         spinner = (ProgressBar)findViewById(R.id.progressBar);
@@ -37,13 +42,16 @@ public class MainActivity extends AppCompatActivity {
         animator = ValueAnimator.ofInt(0, spinner.getMax());
         spinner.setVisibility(View.GONE);
         loading_txt.setVisibility(View.GONE);
+        bluetoothBtn = (Button) findViewById(R.id.bluetoothbtn);
 
         connectBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 connectBtn.setVisibility(View.GONE);
+                bluetoothBtn.setVisibility(View.GONE);
                 loading_txt.setVisibility(View.VISIBLE);
                 spinner.setVisibility(View.VISIBLE);
+
                 animationbg = (AnimationDrawable) mainLayout.getBackground();
                 animationbg.setEnterFadeDuration(2000);
                 animationbg.setExitFadeDuration(2000);
@@ -69,6 +77,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        bluetoothBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                getBluetoothActivity();
+            }
+        });
+
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation){
@@ -90,8 +105,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    public void getBluetoothActivity() {
+        Intent intent = new Intent(getApplicationContext(), BluetoothActivity.class);
+        startActivity(intent);
+    }
+
+
     private void openGyro(){
         Intent intent = new Intent(this,Gryo.class);
         startActivity(intent);
     }
+
 }
