@@ -26,6 +26,8 @@
  * 			Note: only edits PWM
  * 			- dist is the distance to the obstacle
  * 			- v is the max speed at dist > 50cm. (0 to 255) in PWM
+ * void halt();
+ *      stops the robot
  */
 
 //Arduino PWM Speed Control:
@@ -40,9 +42,6 @@ int M2 = 7;
 #define BACKWARD 0
 #define MAX_PWM 255
 
-#define FIG8 8400
-#define SQRTURN 1200
-
 int roboDirection = FORWARD;
 int cur_pwm = 0;
 
@@ -55,53 +54,8 @@ void setDirection(int dir);
 void straight(int velociraptor);
 
 void wheel_setup() {
-	pinMode(M1, OUTPUT);   
-	pinMode(M2, OUTPUT); 
-	Serial.begin(9600);
-}
-
-void wheel_loop() {
-	straight(0); delay(5000);
-	smoothTurn(15, LEFT, MAX_PWM);
-	delay(FIG8);
-	smoothTurn(15, RIGHT, MAX_PWM);
-	delay(FIG8);
-	straight(0); delay(5000);
-
-	straight(MAX_PWM);
-	delay(1000);
-	smoothTurn(0, LEFT, MAX_PWM);
-	delay(SQRTURN);
-	straight(MAX_PWM);
-	delay(2000);
-	smoothTurn(0, LEFT, MAX_PWM);
-	delay(SQRTURN);
-	straight(MAX_PWM);
-	delay(2000);
-	smoothTurn(0, LEFT, MAX_PWM);
-	delay(SQRTURN);
-	straight(MAX_PWM);
-	delay(2000);
-	smoothTurn(0, LEFT, MAX_PWM);
-	delay(SQRTURN);
-	straight(MAX_PWM);
-	delay(2000);
-	smoothTurn(0, RIGHT, MAX_PWM);
-	delay(SQRTURN);
-	straight(MAX_PWM);
-	delay(2000);
-	smoothTurn(0, RIGHT, MAX_PWM);
-	delay(SQRTURN);
-	straight(MAX_PWM);
-	delay(2000);
-	smoothTurn(0, RIGHT, MAX_PWM);
-	delay(SQRTURN);
-	straight(MAX_PWM);
-	delay(2000);
-	smoothTurn(0, RIGHT, MAX_PWM);
-	delay(SQRTURN);
-	straight(MAX_PWM);
-	delay(1000);
+	pinMode(M1, OUTPUT);  
+	pinMode(M2, OUTPUT);
 }
 
 //set PWM to control speed of wheels
@@ -167,3 +121,8 @@ void straight(int velociraptor) {
     digitalWrite(M2, roboDirection);
     setPWM(velociraptor);
 }
+
+void halt() {
+  setPWM(0);
+}
+
