@@ -2,20 +2,21 @@
 #define DATAOUT 11
 #define DATAIN 12
 #define CLK 13
-
+char data[] = "eeLee";
+int clr;
 void setup() {
+  Serial.begin(9600);
   init_SPI();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  send_data(data, 5);
+  delay(3000);
 
 }
 
 
 void init_SPI() {
-  noInterrupts();
-  
   //Initialize pins used for SPI
   pinMode(DATAIN, INPUT);
   pinMode(DATAOUT, OUTPUT);
@@ -33,7 +34,7 @@ void init_SPI() {
   SPCR = B01110000;  
 
   //Clear any previous data in the registers into garbage variable
-  int clr = SPDR + SPSR;
+  clr = SPDR + SPSR;
 }
 
 /*
@@ -43,14 +44,20 @@ void init_SPI() {
  *                  character is the size of the data block
  * Parameter: numBytes - number of charcters to send + 1 for size char
  */
-void send_data(char data[], int numBytes) {
+void send_data(char data[], int numBytes) { 
   //Give signal that data is being sent
-  SPDR = 0;
-  while (!(SPSR & (1<<SPIF)));
+  /*SPDR = '0';
   
-  for (int i = 0; i < numBytes; i++) {
+    while (!(SPSR & _BV(SPIF))) ;
+
+  SPDR = numBytes;
+ 
+    while (!(SPSR & _BV(SPIF))) ;
+*/
+  for (int i = 0; i <= numBytes; i++) {
     SPDR = data[i];
-    while (!(SPSR & (1<<SPIF)));
+    
+    while (!(SPSR & _BV(SPIF))) ;
   }
 }
 
@@ -59,12 +66,11 @@ void send_data(char data[], int numBytes) {
  */
 void receive_data(char received[]) {
   //Give signal that data is requested sent
-  SPDR = 1;
+  SPDR = '1';
   while (!(SPSR & (1<<SPIF)));
   int numBytes = SPDR;
   
-  for (int i = 0; i < numBytes; i++) {
-    SPDR = 1;
+  for (int i = 0; i <= numBytes; i++) {
     while (!(SPSR & (1<<SPIF)));
     received[i] = SPDR;
   }
