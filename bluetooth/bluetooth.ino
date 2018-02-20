@@ -5,12 +5,13 @@ void setup() {
 }
 
 void loop() {
-  if(Serial.available() > 0) {
+  if(Serial.available()) {
     data = Serial.read();
     if(data == '1')
       digitalWrite(13,LOW);
     else if(data == '0')
       digitalWrite(13,HIGH);
   }
+
 
 }
