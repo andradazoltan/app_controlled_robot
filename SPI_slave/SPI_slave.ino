@@ -3,18 +3,22 @@
 #define DATAIN 12
 #define CLK 13
 
-char received[10];
+char command;
+int i = 0;
+char received[6];
 int numBytes;
-char data[10];
+char data[6];
 int requestedBytes;
 
 void setup() {
+  Serial.begin(9600);
    init_SPI();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
+  Serial.println(received);
+  
+  delay(3000);
 }
 
 void init_SPI() {
@@ -38,27 +42,45 @@ void init_SPI() {
   int clr = SPDR + SPSR;
 }
 
+
+
+
+
+
 /*
  * When master begins transmission, check if it a send or receive request,
  * and follow through accordingly.
  */
 ISR (SPI_STC_vect) {
-  int command = SPDR;
+  char got = SPDR;
+  received[i] = got;
+  i++;
+  if(i==6)
+    i = 0;
+/*
+  if(i==0)
+    command = got;
 
-  switch(command) {
-    case 0: //data is about to be sent
-      SPDR = 0;
-      numBytes = SPDR;
-      for(int i = 0; i < numBytes; i++) {
-        SPDR = 0;
-        received[i] = SPDR;
-      }
-      break;
+  else if (i==1)
+    numBytes = (int)got;
 
-    case 1: //data is requested (most recent data sent)
-      SPDR = requestedBytes;
-      for(int i = 0; i < requestedBytes; i++)
-        SPDR = data[i];
+  else if (i == 7) {
+    i=0;
+    
   }
+
+  else
+    received[i-2] = got;*/
 }
 
+/*
+ * Function takes in an integer array of any size
+ * and sets all the values in the array to 0.
+ * 
+ * Parameter: arr - integer array
+ * Parameter: width - size of the array
+ */
+void clearArray(char arr[], int width) {
+  for(int index = 0; index < width; index++)
+    arr[index] = '\0';
+}
