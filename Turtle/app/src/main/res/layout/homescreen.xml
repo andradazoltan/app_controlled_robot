@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_animate"
+    android:id="@+id/main"
+    android:gravity="center"
+    tools:context="com.turtletest.turtle.MainActivity">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    <Button
+        android:id="@+id/bluetoothbtn"
+        android:layout_gravity="center"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="125dp"
+        android:background="@drawable/bluetooth_btn"
+        android:fontFamily="monospace"
+        android:text="START ROBOT"
+        tools:fontFamily="@font/space_mono"
+        android:textScaleX="1.25"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:layout_alignParentBottom="true"
+                android:layout_marginTop="60dp"
+                android:src="@drawable/rock" />
+
+            <ImageView
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignRight="@id/colorpolyrocks"
+                android:src="@drawable/onepolyplant"
+                android:id="@+id/imageView4" />
+
+            <ImageView
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignTop="@+id/colorpolyrocks"
+                android:layout_marginTop="18dp"
+                android:src="@drawable/graypolyrock"
+                android:id="@+id/imageView" />
+
+            <ImageView
+                android:id="@+id/colorpolyrocks"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:background="@drawable/colorpolyrocks"
+                android:layout_alignParentBottom="true"/>
+
+
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/graypolyrock"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"/>
+
+
+            <ImageView
+                android:layout_width="150dp"
+                android:layout_height="130dp"
+                android:layout_alignTop="@+id/imageView"
+                android:layout_marginEnd="18dp"
+                android:layout_marginTop="60dp"
+                android:layout_toStartOf="@+id/imageView"
+                android:src="@drawable/polyplant" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/homebg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/polyseal"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom="50dp"
+                android:src="@drawable/polyseal" />
+
+            <ImageView
+                android:layout_width="300dp"
+                android:layout_height="200dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:layout_margin="30dp"
+                android:layout_marginEnd="60dp"
+                android:src="@drawable/polyturtle" />
+
+            <ImageView
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:src="@drawable/polyplant" />
+
+        </RelativeLayout>
+    </FrameLayout>
+
+</LinearLayout>

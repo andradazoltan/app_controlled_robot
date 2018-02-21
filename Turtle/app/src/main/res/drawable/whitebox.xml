@@ -7,4 +7,6 @@
     <padding android:top="15dp" android:bottom="15dp"
         android:left="20dp" android:right="20dp"/>
 
+    <solid android:color="@color/white"/>
+
 </shape>

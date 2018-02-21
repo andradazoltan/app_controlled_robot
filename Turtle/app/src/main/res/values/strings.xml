@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Turtle</string>
+
+    <string name="group_name"><b><u>CPEN 291 G17-B</u></b></string>
 </resources>

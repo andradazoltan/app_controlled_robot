@@ -1,24 +1,23 @@
 package com.turtletest.turtle;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewTreeObserver;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import java.lang.Math;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.widget.Toast;
 
-/**
- * Created by Grace on 2018-02-10.
- */
-
-public class Gryo extends AppCompatActivity{
+public class Gryo extends Fragment{
     TextView xaxis;
     TextView yaxis;
     TextView zaxis;
@@ -39,33 +38,46 @@ public class Gryo extends AppCompatActivity{
 
     int maxSpeed = 0;
 
+    private ConnectedThread thread;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState){
+        return inflater.inflate(R.layout.gryo, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState){
+        super.onViewCreated(view, savedInstanceState);
+
+        xaxis = (TextView) view.findViewById(R.id.xaxis);
+        yaxis = (TextView) view.findViewById(R.id.yaxis);
+        zaxis = (TextView) view.findViewById(R.id.zaxis);
+
+        xorientation = (TextView) view.findViewById(R.id.xorientation);
+        yorientation = (TextView) view.findViewById(R.id.yorientation);
+        zorientation = (TextView) view.findViewById(R.id.zorientation);
+
+        innerCircle = (ImageView) view.findViewById(R.id.innercircle);
+        outerCircle = (ImageView) view.findViewById(R.id.outercircle);
+        innerCircle.setVisibility(View.VISIBLE);
+
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState){
+        super.onActivityCreated(savedInstanceState);
 
         SensorManager sensorManager =
-                (SensorManager) getSystemService(SENSOR_SERVICE);
+                (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         Sensor gyroscopeSensor =
                 sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         Sensor rotationVectorSensor =
                 sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.gryo);
 
 
-        xaxis = (TextView) findViewById(R.id.xaxis);
-        yaxis = (TextView) findViewById(R.id.yaxis);
-        zaxis = (TextView) findViewById(R.id.zaxis);
-
-        xorientation = (TextView) findViewById(R.id.xorientation);
-        yorientation = (TextView) findViewById(R.id.yorientation);
-        zorientation = (TextView) findViewById(R.id.zorientation);
-
-        innerCircle = (ImageView) findViewById(R.id.innercircle);
-        outerCircle = (ImageView) findViewById(R.id.outercircle);
-        innerCircle.setVisibility(View.VISIBLE);
-
+        BluetoothActivity act = (BluetoothActivity) getActivity();
+        thread = act.getThread();
 
         outerCircle.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener(){
             public void onGlobalLayout() {
@@ -84,14 +96,6 @@ public class Gryo extends AppCompatActivity{
 
                 radius = (int)(rectf.height()/2.5);
 
-                System.out.println("HEIGHT IS " +  rectf.height());
-                System.out.println("WIDTH IS " +  rectf.width());
-
-                System.out.println("RADIUS IS " + height/2);
-
-                System.out.println("X is " +  location[0]);
-
-                System.out.println("Y is " +  location[1]);
 
                 //don't forget to remove the listener to prevent being called again by future layout events:
                 outerCircle.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -141,6 +145,13 @@ public class Gryo extends AppCompatActivity{
                 yorientation.setText(Float.toString(orientations[1]));
                 zorientation.setText(Float.toString(orientations[2]));
 
+                //send to bluetooth
+                if (thread != null) {//First check to make sure thread created
+                    thread.write("x: " + orientations[0]);
+                    thread.write("y: " + orientations[1]);
+                    thread.write("z: " + orientations[2]);
+                    //Toast.makeText(getContext(), Integer.toString(i), Toast.LENGTH_SHORT).show();
+                }
                 vtilt = location[1] - Math.round(Math.max(-90,Math.min(90,orientations[1]/90)) * (radius - 5));
                 htilt = location[0] - 5 + Math.round(Math.max(-90,Math.min(90,orientations[2]/90)) * (radius - 5));
 
@@ -165,7 +176,8 @@ public class Gryo extends AppCompatActivity{
 // Register the listener
         sensorManager.registerListener(gyroscopeSensorListener,
                 gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
-    };
+    }
+
 
 
 }
