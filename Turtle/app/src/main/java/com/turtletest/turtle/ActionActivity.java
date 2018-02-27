@@ -26,11 +26,19 @@ public class ActionActivity extends Fragment{
     private CardView manualButton;
     public ConnectedThread thread;
 
+    private Button mStart;
+    private Button mScanBtn;
+    private Button mOffBtn;
+    private Button mListPairedDevicesBtn;
+    private Button mDiscoverBtn;
+
     private Button startstopbtn;
+    private CardView followBtn;
+    private CardView obstacleBtn;
 
     private BluetoothActivity act;
 
-    private SeekBar seekbar;
+    //private SeekBar seekbar;
 
     private AboutUs aboutus;
     private LightsActivity lightactivity;
@@ -56,8 +64,11 @@ public class ActionActivity extends Fragment{
         manualButton = (CardView) view.findViewById(R.id.manual);
 
         startstopbtn = (Button) view.findViewById(R.id.startstopbtn);
+        followBtn = (CardView) view.findViewById(R.id.manualBTbtn);
+        obstacleBtn = view.findViewById(R.id.obstacleBtn);
 
-        seekbar = (SeekBar) view.findViewById(R.id.seekbar);
+
+        //seekbar = (SeekBar) view.findViewById(R.id.seekbar);
     }
 
 
@@ -68,8 +79,13 @@ public class ActionActivity extends Fragment{
         fragmentTransaction = fragmentManager.beginTransaction();
 
         act = (BluetoothActivity) getActivity();
-        seekbar.setEnabled(false);
+        //seekbar.setEnabled(false);
 
+        mStart = act.findViewById(R.id.startbtn);
+        mScanBtn = act.findViewById(R.id.scan);
+        mOffBtn = act.findViewById(R.id.off);
+        mListPairedDevicesBtn = act.findViewById(R.id.PairedBtn);
+        mDiscoverBtn = act.findViewById(R.id.discover);
         thread = act.getThread();
         if (thread!= null) {
             thread.write("andrada");
@@ -90,7 +106,7 @@ public class ActionActivity extends Fragment{
             @Override
             public void onClick(View v){
                 lightactivity = new LightsActivity();
-                seekbar.setEnabled(true);
+                //seekbar.setEnabled(true);
                 disableCards(false);
                 fragmentTransaction = getFragmentManager().beginTransaction();
                 fragmentTransaction.replace(android.R.id.content, lightactivity).addToBackStack(null).commit();
@@ -117,6 +133,8 @@ public class ActionActivity extends Fragment{
             public void onClick(View v){
                 manualactivity = new ManualActivity();
                 disableCards(false);
+                act.changeCardVisibility(true, followBtn);
+                act.changeCardVisibility(true, obstacleBtn);
                 fragmentTransaction = getFragmentManager().beginTransaction();
                 fragmentTransaction.replace(android.R.id.content, manualactivity).addToBackStack(null).commit();
             }
@@ -135,6 +153,13 @@ public class ActionActivity extends Fragment{
         act.changeCardVisibility(visible, lightsButton);
         act.changeCardVisibility(visible, bluetoothButton);
         act.changeButtonVisibility(visible, startstopbtn);
+        act.changeCardVisibility(visible, followBtn);
+        act.changeCardVisibility(visible, obstacleBtn);
+        act.changeButtonVisibility(visible, mDiscoverBtn);
+        act.changeButtonVisibility(visible, mListPairedDevicesBtn);
+        act.changeButtonVisibility(visible, mOffBtn);
+        act.changeButtonVisibility(visible, mScanBtn);
+        act.changeButtonVisibility(visible, mStart);
     }
 
 
