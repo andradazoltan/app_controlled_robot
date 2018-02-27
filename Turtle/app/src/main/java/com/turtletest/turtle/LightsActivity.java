@@ -1,32 +1,56 @@
 package com.turtletest.turtle;
 
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v4.app.Fragment;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.graphics.ColorUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SeekBar;
-import android.widget.Toast;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
+import com.madrapps.pikolo.HSLColorPicker;
+import com.madrapps.pikolo.listeners.SimpleColorSelectionListener;
 
-/**
- * Created by Grace on 2018-02-19.
- */
+import java.util.Random;
 
 public class LightsActivity extends Fragment {
 
-    private SeekBar bar;
     private ConnectedThread thread;
+
+    private HSLColorPicker colorPicker;
+    private ImageView imageView;
+    private ImageButton imageButton1;
+    private ImageButton imageButton2;
+    private ImageButton imageButton3;
+    private ImageButton imageButton4;
+    private ImageButton imageButton5;
+
+    int colour;
+
+    private Button randomColorButton;
+
+    private Random random = new Random();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.lightsactivity, container, false);
+        return inflater.inflate(R.layout.newlightactivity, container, false);
+
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        bar = view.findViewById(R.id.seekbar);
+        colorPicker = (HSLColorPicker) view.findViewById(R.id.colorPicker);
+        imageView = view.findViewById(R.id.imageView);
+        randomColorButton = view.findViewById(R.id.randomColorButton);
+        imageButton1 = view.findViewById(R.id.imageButton1);
+        imageButton2 = view.findViewById(R.id.imageButton2);
+        imageButton3 = view.findViewById(R.id.imageButton3);
+        imageButton4 = view.findViewById(R.id.imageButton4);
+        imageButton5 = view.findViewById(R.id.imageButton5);
 
     }
 
@@ -34,39 +58,76 @@ public class LightsActivity extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        Drawable draw = getResources().getDrawable(R.drawable.progressbar);
-        bar.setProgressDrawable(draw);
-
         BluetoothActivity act = (BluetoothActivity) getActivity();
         thread = act.getThread();
 
-        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            int progress = 0;
-
+        colorPicker.setColorSelectionListener(new SimpleColorSelectionListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                progress = i;
-                Toast.makeText(getContext(), "Changing led display", Toast.LENGTH_SHORT).show();
-
-                if (thread != null); //First check to make sure thread created
-                    //thread.write("L " + Integer.toString(i));
-                //Toast.makeText(getContext(), Integer.toString(i), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                Toast.makeText(getContext(), "Started tracking", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                Toast.makeText(getContext(), "Stopped Tracking", Toast.LENGTH_SHORT).show();
+            public void onColorSelected(int color) {
+                // Do whatever you want with the color
+                colour = color;
+                imageView.getBackground().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
             }
         });
 
+        imageButton1.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Click(v);
+            }
+        });
 
+        imageButton2.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Click(v);
+            }
+        });
+        imageButton3.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Click(v);
+            }
+        });
+        imageButton4.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Click(v);
+            }
+        });
+        imageButton5.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Click(v);
+            }
+        });
 
+        randomColorButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+               if (thread!=null){
+                   thread.write("L: " + colour);
+               }
+            }
+        });
     }
+
+    public void Click(View v){
+        if(v.getId() == R.id.randomColorButton){
+            final int color = ColorUtils.HSLToColor(new float[]{random.nextInt(360), random.nextFloat(), random.nextFloat()});
+            final String hexColor = String.format("#%06X", (0xFFFFFF & color));
+            randomColorButton.setText(hexColor);
+            randomColorButton.setBackgroundColor(color);
+            imageView.getBackground().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+            colorPicker.setColor(color);
+        }
+        if(v instanceof ImageButton){
+            final int color = ((ColorDrawable) ((ImageButton) v).getDrawable()).getColor();
+            imageView.getBackground().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+            colorPicker.setColor(color);
+        }
+    }
+
 
 }
 

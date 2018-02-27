@@ -3,10 +3,10 @@
 xmlns:android="http://schemas.android.com/apk/res/android"
 android:shape="oval">
 
-<solid
-    android:color="@color/colorPrimaryDark"/>
-
 <size
     android:width="200dp"
     android:height="200dp"/>
+
+    <gradient android:type="radial" android:gradientRadius="250"
+        android:startColor="@color/lightblue" android:endColor="@color/darkblue" />
 </shape>

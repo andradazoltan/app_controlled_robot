@@ -165,10 +165,9 @@ public class Gryo extends Fragment{
                 }
 
                 if (startGyro) {
-                    //Toast.makeText(getContext(), "ON", Toast.LENGTH_SHORT).show();
                     if (thread != null) {//First check to make sure thread created
-                        //thread.write("M " + orientations[1] + " " + orientations[2]);
-                        Toast.makeText(getContext(), Integer.toString((int) orientations[1]), Toast.LENGTH_SHORT).show();
+                        thread.write("M " + orientations[1] + " " + orientations[2]);
+                        //Toast.makeText(getContext(), Integer.toString((int) orientations[1]), Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -187,7 +186,6 @@ public class Gryo extends Fragment{
             }
         });
 
-        Toast.makeText(getContext(), String.valueOf(startGyro), Toast.LENGTH_SHORT).show();
 
 // Register it
         sensorManager.registerListener(rvListener,

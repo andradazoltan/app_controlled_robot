@@ -51,8 +51,10 @@ public class BluetoothActivity extends FragmentActivity{
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
 
-    private SeekBar seekBar;
+    //private SeekBar seekBar;
     private Button startstopBtn;
+    private CardView followBtn;
+    private CardView obstacleBtn;
 
     //Associated fragments
     private CardView aboutUsButton;
@@ -96,14 +98,20 @@ public class BluetoothActivity extends FragmentActivity{
         autoButton = (CardView) findViewById(R.id.automatic);
         manualButton = (CardView) findViewById(R.id.manual);
 
-        seekBar = (SeekBar) findViewById(R.id.seekbar);
+        followBtn = (CardView) findViewById(R.id.manualBTbtn);
+        obstacleBtn = (CardView) findViewById(R.id.obstacleBtn);
+
+        //seekBar = (SeekBar) findViewById(R.id.seekbar);
 
         changeButtonVisibility(true, mScanBtn);
         changeButtonVisibility(true, mStart);
         changeButtonVisibility(true, mDiscoverBtn);
         changeButtonVisibility(true, mListPairedDevicesBtn);
         changeButtonVisibility(true, mOffBtn);
+
         changeButtonVisibility(false, startstopBtn);
+        changeCardVisibility(false, followBtn);
+        changeCardVisibility(false, obstacleBtn);
 
         // Child Buttons/Cardviews
         changeCardVisibility(false, aboutUsButton);
@@ -164,13 +172,17 @@ public class BluetoothActivity extends FragmentActivity{
                     fragmentTransaction.replace(android.R.id.content, actionactivity).addToBackStack(null).commit();
 
 
-                    seekBar.setEnabled(false);
+                    //seekBar.setEnabled(false);
                     changeButtonVisibility(false, mScanBtn);
                     changeButtonVisibility(false, mStart);
                     changeButtonVisibility(false, mDiscoverBtn);
                     changeButtonVisibility(false, mListPairedDevicesBtn);
                     changeButtonVisibility(false, mOffBtn);
                     changeButtonVisibility(false, startstopBtn);
+
+                    changeCardVisibility(false, followBtn);
+                    changeCardVisibility(false, obstacleBtn);
+
                 }
             });
 
