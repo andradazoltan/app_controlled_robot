@@ -20,6 +20,11 @@
 
 #define SERVO_DELAY 50
 
+void ultrasonic_setup();
+void turn_servo(int);
+double read_dist();
+double read_temperature();
+
 int pos;
 Servo motor;
 
