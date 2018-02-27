@@ -17,12 +17,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,8 +51,15 @@ public class BluetoothActivity extends FragmentActivity{
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
 
-    //Associated fragments
+    private SeekBar seekBar;
+    private Button startstopBtn;
 
+    //Associated fragments
+    private CardView aboutUsButton;
+    private CardView lightsButton;
+    private CardView bluetoothButton;
+    private CardView autoButton;
+    private CardView manualButton;
 
     private final String TAG = MainActivity.class.getSimpleName();
     private Handler mHandler; // Our main handler that will receive callback notifications
@@ -79,9 +88,32 @@ public class BluetoothActivity extends FragmentActivity{
         mListPairedDevicesBtn = (Button)findViewById(R.id.PairedBtn);
         mStart = (Button)findViewById(R.id.startbtn);
 
+        startstopBtn = (Button) findViewById(R.id.startstopbtn);
+
+        aboutUsButton = (CardView) findViewById(R.id.aboutusBtn);
+        lightsButton = (CardView) findViewById(R.id.light);
+        bluetoothButton = (CardView) findViewById(R.id.bluetooth);
+        autoButton = (CardView) findViewById(R.id.automatic);
+        manualButton = (CardView) findViewById(R.id.manual);
+
+        seekBar = (SeekBar) findViewById(R.id.seekbar);
+
+        changeButtonVisibility(true, mScanBtn);
+        changeButtonVisibility(true, mStart);
+        changeButtonVisibility(true, mDiscoverBtn);
+        changeButtonVisibility(true, mListPairedDevicesBtn);
+        changeButtonVisibility(true, mOffBtn);
+        changeButtonVisibility(false, startstopBtn);
+
+        // Child Buttons/Cardviews
+        changeCardVisibility(false, aboutUsButton);
+        changeCardVisibility(false, lightsButton);
+        changeCardVisibility(false, bluetoothButton);
+        changeCardVisibility(false, autoButton);
+        changeCardVisibility(false, manualButton);
+
         //Fragment managers
         fragmentManager = getSupportFragmentManager();
-
 
         mBTArrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
         mBTAdapter = BluetoothAdapter.getDefaultAdapter(); // get a handle on the bluetooth radio
@@ -127,8 +159,18 @@ public class BluetoothActivity extends FragmentActivity{
                 @Override
                 public void onClick(View v){
                     Fragment actionactivity = new ActionActivity();
+
                     fragmentTransaction = getSupportFragmentManager().beginTransaction();
                     fragmentTransaction.replace(android.R.id.content, actionactivity).addToBackStack(null).commit();
+
+
+                    seekBar.setEnabled(false);
+                    changeButtonVisibility(false, mScanBtn);
+                    changeButtonVisibility(false, mStart);
+                    changeButtonVisibility(false, mDiscoverBtn);
+                    changeButtonVisibility(false, mListPairedDevicesBtn);
+                    changeButtonVisibility(false, mOffBtn);
+                    changeButtonVisibility(false, startstopBtn);
                 }
             });
 
@@ -178,7 +220,6 @@ public class BluetoothActivity extends FragmentActivity{
     public ConnectedThread getThread(){
         return mConnectedThread;
     }
-
 
 
     // Enter here after user selects "yes" or "no" to enabling radio
@@ -295,7 +336,6 @@ public class BluetoothActivity extends FragmentActivity{
                         mConnectedThread.setHandler(mHandler);
 
                         mConnectedThread.start();
-
                         mHandler.obtainMessage(CONNECTING_STATUS, 1, -1, name)
                                 .sendToTarget();
                     }
@@ -318,10 +358,31 @@ public class BluetoothActivity extends FragmentActivity{
     public void onBackPressed(){
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             Log.i("MainActivity", "popping backstack");
+            changeButtonVisibility(true, mScanBtn);
+            changeButtonVisibility(true, mStart);
+            changeButtonVisibility(true, mDiscoverBtn);
+            changeButtonVisibility(true, mListPairedDevicesBtn);
+            changeButtonVisibility(true, mOffBtn);
             getSupportFragmentManager().popBackStack();
         } else {
             Log.i("MainActivity", "nothing on backstack, calling super");
             super.onBackPressed();
+        }
+    }
+
+    public void changeCardVisibility(boolean visibility, CardView c){
+        if (visibility){
+            c.setVisibility(View.VISIBLE);
+        } else {
+            c.setVisibility(View.GONE);
+        }
+    }
+
+    public void changeButtonVisibility(boolean visibility, Button b){
+        if (visibility){
+            b.setVisibility(View.VISIBLE);
+        } else{
+            b.setVisibility(View.GONE);
         }
     }
 

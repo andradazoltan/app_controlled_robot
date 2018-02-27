@@ -10,4 +10,8 @@
 
     </style>
 
+    <style name="colorControlHighlight_blue">
+        <item name="colorControlHighlight">@color/lightblue</item>
+    </style>
+
 </resources>

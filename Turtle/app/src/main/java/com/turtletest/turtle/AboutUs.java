@@ -15,6 +15,7 @@ public class AboutUs extends Fragment{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
+        getContext().getTheme().applyStyle(R.style.colorControlHighlight_blue, true);
         return inflater.inflate(R.layout.aboutus, container, false);
     }
 

@@ -8,9 +8,11 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import java.lang.Math;
@@ -25,8 +27,14 @@ public class Gryo extends Fragment{
     TextView yorientation;
     TextView zorientation;
 
+    private Button startstopBtn;
+
     ImageView innerCircle;
     ImageView outerCircle;
+
+    private float[] orientations = new float[3];
+
+   private boolean startGyro = false;
 
     int[] location = new int[2];
     int radius;
@@ -49,6 +57,8 @@ public class Gryo extends Fragment{
     public void onViewCreated(View view, Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
+        startstopBtn = view.findViewById(R.id.startstopbtn);
+
         xaxis = (TextView) view.findViewById(R.id.xaxis);
         yaxis = (TextView) view.findViewById(R.id.yaxis);
         zaxis = (TextView) view.findViewById(R.id.zaxis);
@@ -63,9 +73,11 @@ public class Gryo extends Fragment{
 
     }
 
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
+
 
         SensorManager sensorManager =
                 (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
@@ -74,10 +86,10 @@ public class Gryo extends Fragment{
         Sensor rotationVectorSensor =
                 sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
-
-
         BluetoothActivity act = (BluetoothActivity) getActivity();
+
         thread = act.getThread();
+
 
         outerCircle.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener(){
             public void onGlobalLayout() {
@@ -96,7 +108,8 @@ public class Gryo extends Fragment{
 
                 radius = (int)(rectf.height()/2.5);
 
-
+                innerCircle.setX(location[0]);
+                innerCircle.setY(location[1]);
                 //don't forget to remove the listener to prevent being called again by future layout events:
                 outerCircle.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
@@ -105,12 +118,9 @@ public class Gryo extends Fragment{
         SensorEventListener gyroscopeSensorListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-
                 xaxis.setText(Float.toString(sensorEvent.values[0]));
                 yaxis.setText(Float.toString(sensorEvent.values[1]));
                 zaxis.setText(Float.toString(sensorEvent.values[2]));
-
-
             }
 
             @Override
@@ -133,7 +143,6 @@ public class Gryo extends Fragment{
                         SensorManager.AXIS_Z,
                         remappedRotationMatrix);
                 // Convert to orientations
-                float[] orientations = new float[3];
                 SensorManager.getOrientation(remappedRotationMatrix, orientations);
 
 
@@ -145,19 +154,22 @@ public class Gryo extends Fragment{
                 yorientation.setText(Float.toString(orientations[1]));
                 zorientation.setText(Float.toString(orientations[2]));
 
-                //send to bluetooth
-                if (thread != null) {//First check to make sure thread created
-                    thread.write("x: " + orientations[0]);
-                    thread.write("y: " + orientations[1]);
-                    thread.write("z: " + orientations[2]);
-                    //Toast.makeText(getContext(), Integer.toString(i), Toast.LENGTH_SHORT).show();
-                }
+
+                //Toast.makeText(getContext(), "gryo", Toast.LENGTH_SHORT).show();
                 vtilt = location[1] - Math.round(Math.max(-90,Math.min(90,orientations[1]/90)) * (radius - 5));
                 htilt = location[0] - 5 + Math.round(Math.max(-90,Math.min(90,orientations[2]/90)) * (radius - 5));
 
                 if (Math.sqrt(Math.pow((htilt - location[0]),2) + Math.pow((vtilt-location[1]),2)) <= radius) {
                     innerCircle.setX(htilt);
                     innerCircle.setY(vtilt);
+                }
+
+                if (startGyro) {
+                    //Toast.makeText(getContext(), "ON", Toast.LENGTH_SHORT).show();
+                    if (thread != null) {//First check to make sure thread created
+                        //thread.write("M " + orientations[1] + " " + orientations[2]);
+                        Toast.makeText(getContext(), Integer.toString((int) orientations[1]), Toast.LENGTH_SHORT).show();
+                    }
                 }
 
             }
@@ -167,7 +179,15 @@ public class Gryo extends Fragment{
             }
         };
 
+        startstopBtn.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                startGyro = !startGyro;
+                Toast.makeText(getContext(), String.valueOf(startGyro), Toast.LENGTH_SHORT).show();
+            }
+        });
 
+        Toast.makeText(getContext(), String.valueOf(startGyro), Toast.LENGTH_SHORT).show();
 
 // Register it
         sensorManager.registerListener(rvListener,

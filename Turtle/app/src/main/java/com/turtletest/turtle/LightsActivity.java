@@ -48,9 +48,9 @@ public class LightsActivity extends Fragment {
                 progress = i;
                 Toast.makeText(getContext(), "Changing led display", Toast.LENGTH_SHORT).show();
 
-                if (thread != null) //First check to make sure thread created
-                    thread.write(Integer.toString(i));
-                Toast.makeText(getContext(), Integer.toString(i), Toast.LENGTH_SHORT).show();
+                if (thread != null); //First check to make sure thread created
+                    //thread.write("L " + Integer.toString(i));
+                //Toast.makeText(getContext(), Integer.toString(i), Toast.LENGTH_SHORT).show();
             }
 
             @Override

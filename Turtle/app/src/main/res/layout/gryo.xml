@@ -9,6 +9,17 @@
         android:orientation="vertical"
         android:padding="10dp">
 
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/startstopbtn"
+            android:background="@drawable/bluetooth_btn"
+            android:textColor="@color/white"
+            android:text="START/STOP"
+            android:layout_marginTop="3dp"
+            android:layout_gravity="center_horizontal"/>
+
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"

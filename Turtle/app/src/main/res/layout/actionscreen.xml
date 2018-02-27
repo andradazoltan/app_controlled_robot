@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.turtletest.turtle.ActionActivity">
 
     <fragment
@@ -55,6 +56,8 @@
                     android:id="@+id/light"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:clickable="true"
+                    android:focusable="true"
+                    app:cardElevation="7dp"
 
                     android:layout_width="160dp"
                     android:layout_height="190dp"
@@ -100,6 +103,8 @@
                     android:id="@+id/bluetooth"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:clickable="true"
+                    android:focusable="true"
+                    app:cardElevation="7dp"
 
                     android:layout_width="160dp"
                     android:layout_height="190dp"
@@ -154,6 +159,8 @@
                     android:id="@+id/manual"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:clickable="true"
+                    android:focusable="true"
+                    app:cardElevation="7dp"
 
                     android:layout_width="160dp"
                     android:layout_height="190dp"
@@ -199,6 +206,8 @@
                     android:id="@+id/automatic"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:clickable="true"
+                    android:focusable="true"
+                    app:cardElevation="7dp"
 
                     android:layout_width="160dp"
                     android:layout_height="190dp"
@@ -253,6 +262,8 @@
                     android:id="@+id/aboutusBtn"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:clickable="true"
+                    android:focusable="true"
+                    app:cardElevation="7dp"
 
                     android:layout_width="160dp"
                     android:layout_height="190dp"
