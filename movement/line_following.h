@@ -17,8 +17,8 @@
 #define BLACK 1
 
 #define MAX_CURV 300
-#define DELAY 10
-#define START_DELAY 1000
+#define LINE_DELAY 20
+#define START_LINE_DELAY 1000
 #define MIN_DIFF 100
 
 // function declarations
@@ -65,20 +65,28 @@ void follow_line() {
             smoothTurn(MAX_CURV/curvature, LEFT, line_spd);
         }
 
-        // white white, pivot right
-        else if (curvature <= 0) {
+        // white white, rotate right
+        else if (curvature < -4) {
             //Serial.println("PANIC! right");
             curvature = -(MAX_CURV+1);
             rotate(RIGHT, line_spd);
         }
 
-        else {
+		// white white, rotate left
+        else if (curvature > 4) {
             //Serial.println("PANIC! left");
             curvature = MAX_CURV+1;
             rotate(LEFT, line_spd);
         }
-        
-        delay(DELAY);
+
+		// white white, line lost, stop
+		else {
+			//Serial.println("LINE LOST");
+			halt();
+			break;
+		}
+
+        delay(LINE_DELAY);
     }
 }
 
@@ -104,7 +112,7 @@ void calibrate() {
     int val2 = analogRead(IRPIN_R);
     minval = min(minval, min(val1, val2));
     maxval = max(maxval, max(val1, val2));
-    delay(DELAY);
+    delay(LINE_DELAY);
     }
     halt();
     threshold = maxval - (maxval - minval)/3;

@@ -26,7 +26,7 @@
 #define MIN_SPEED 20
 
 // delay
-#define SHORT_DELAY 20
+#define AVOID_DELAY 20
 
 // function declarations
 void avoid_obstacles();
@@ -66,14 +66,14 @@ void slow_down() {
         } else {
             straight(MIN_SPEED + (avoid_spd - MIN_SPEED) * (dist - UNIFORM_DIST) / DIST_DIFF);
         }
-        delay(SHORT_DELAY);
+        delay(AVOID_DELAY);
     }
 }
 
 double check_dist(int pos) {
     turn_servo(pos);
     double dist = read_dist();
-    delay(SHORT_DELAY);
+    delay(AVOID_DELAY);
     turn_servo(SERVO_MID);
     return dist;
 }
@@ -83,7 +83,7 @@ void turn90(int dir, double end_dist) {
     turn_servo(180 - dir);
     rotate(dir/180, avoid_spd/2);
     while (abs(read_dist() - goal_dist) > EPS) {
-        delay(SHORT_DELAY);
+        delay(AVOID_DELAY);
     }
     halt();
 
