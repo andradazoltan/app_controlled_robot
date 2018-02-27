@@ -17,7 +17,7 @@
 #define BLACK 1
 
 #define MAX_CURV 300
-#define LINE_DELAY 20
+#define LINE_DELAY 10
 #define START_LINE_DELAY 1000
 #define MIN_DIFF 100
 
@@ -66,17 +66,19 @@ void follow_line() {
         }
 
         // white white, rotate right
-        else if (curvature < -6) {
+        else if (curvature < -4) {
             //Serial.println("PANIC! right");
             curvature = -(MAX_CURV+1);
-            rotate(RIGHT, line_spd);
+			smoothTurn(0, RIGHT, line_spd);
+            //rotate(RIGHT, line_spd);
         }
 
 		// white white, rotate left
-        else if (curvature > 12) {
+        else if (curvature > 8) {
             //Serial.println("PANIC! left");
             curvature = MAX_CURV+1;
-            rotate(LEFT, line_spd);
+			smoothTurn(0, LEFT, line_spd);
+            //rotate(LEFT, line_spd);
         }
 
 		// white white, line lost, stop
