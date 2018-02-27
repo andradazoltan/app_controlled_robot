@@ -21,7 +21,7 @@
  * void setDirection(int dir);
  * 			flips the direction of movement until setDirection is called again
  * 			- dir is the direction of the movement. (FORWARD, BACKWARD)
- * void slowDown(int dist, int v);
+ * void slowDown(int dist, int v); // probably BROKEN!
  * 			Slows to a stop in front of the obstacle, no effect if dist > 50cm
  * 			Note: only edits PWM
  * 			- dist is the distance to the obstacle
@@ -29,6 +29,9 @@
  * void halt();
  *      stops the robot
  */
+
+#ifndef WHEELZ_H
+#define WHEELZ_H
 
 //Arduino PWM Speed Control:
 int E1 = 5;  
@@ -126,3 +129,4 @@ void halt() {
   setPWM(0);
 }
 
+#endif
