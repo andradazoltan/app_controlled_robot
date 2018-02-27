@@ -4,6 +4,7 @@
  */
 
 #include "wheelZ.h"
+#include "ultrasonic_sensor.h"
 
 // TODO add docs
 
