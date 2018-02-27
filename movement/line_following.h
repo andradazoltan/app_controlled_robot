@@ -61,19 +61,19 @@ void follow_line() {
         // black white
         else if (left == BLACK && right == WHITE) {
             //Serial.println("turn left");
-            curvature = min(MAX_CURV+1, curvature+2);
+            curvature = min(MAX_CURV+1, curvature+4);
             smoothTurn(MAX_CURV/curvature, LEFT, line_spd);
         }
 
         // white white, rotate right
-        else if (curvature < -4) {
+        else if (curvature < -6) {
             //Serial.println("PANIC! right");
             curvature = -(MAX_CURV+1);
             rotate(RIGHT, line_spd);
         }
 
 		// white white, rotate left
-        else if (curvature > 4) {
+        else if (curvature > 12) {
             //Serial.println("PANIC! left");
             curvature = MAX_CURV+1;
             rotate(LEFT, line_spd);
@@ -106,7 +106,7 @@ bool checkBlackOrWhite(int val) {
 void calibrate() {
     int minval = 1024;
     int maxval = 0;
-    rotate(RIGHT, MAX_PWM/5);
+    rotate(RIGHT, MAX_PWM/3);
     while (maxval-minval < MIN_DIFF) {
     int val1 = analogRead(IRPIN_L);
     int val2 = analogRead(IRPIN_R);
