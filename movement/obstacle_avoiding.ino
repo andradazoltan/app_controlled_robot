@@ -38,7 +38,7 @@ void loop() {
     slow_down();
     double left_dist = check_dist(LEFT);
     double right_dist = check_dist(RIGHT);
-    if (right_dist > left_dist);
+    if (right_dist > left_dist){
         turn90(RIGHT, right_dist);
     } else {
         turn90(LEFT, left_dist);
