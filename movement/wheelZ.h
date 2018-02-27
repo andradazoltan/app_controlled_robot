@@ -33,20 +33,22 @@
 #ifndef WHEELZ_H
 #define WHEELZ_H
 
-//Arduino PWM Speed Control:
-int E1 = 5;  
-int M1 = 4; 
-int E2 = 6;                      
-int M2 = 7;                 
+// Arduino Motor pins
+#define E1 5
+#define M1 4
+#define E2 6                      
+#define M2 7                 
 
+// Direction and speed constants
 #define LEFT 1
 #define RIGHT 0
 #define FORWARD 1
 #define BACKWARD 0
 #define MAX_PWM 255
 
-int roboDirection = FORWARD;
-int cur_pwm = 0;
+// function declarations
+void wheel_setup();
+void wheel_reset();
 
 void setPWM(int velociraptor);
 void rotate(int dir, int val);
@@ -55,15 +57,25 @@ void slowDown(int dist);
 void smoothTurn(double radius, int dir, int velociraptor);
 void setDirection(int dir);
 void straight(int velociraptor);
+void halt();
 
+// Direction of the robot
+int roboDirection;
+
+// initialize pins and direction
 void wheel_setup() {
 	pinMode(M1, OUTPUT);  
 	pinMode(M2, OUTPUT);
+	roboDirection = FORWARD;
+}
+
+void wheel_reset() {
+	roboDirection = FORWARD;
+	halt();
 }
 
 //set PWM to control speed of wheels
 void setPWM(int velociraptor) {
-	cur_pwm = velociraptor;
 	analogWrite(E1, velociraptor);
 	analogWrite(E2, velociraptor);
 }
@@ -130,3 +142,4 @@ void halt() {
 }
 
 #endif
+

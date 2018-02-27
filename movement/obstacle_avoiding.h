@@ -3,6 +3,9 @@
  * We follow the left edge of a black tape on a white background.
  */
 
+#ifndef OBSTACLE_AVOIDING_H
+#define OBSTACLE_AVOIDING_H
+
 #include "wheelZ.h"
 #include "ultrasonic_sensor.h"
 
@@ -13,35 +16,40 @@
 
 #define EPS 1
 
-//units are cm
+// units are cm
 #define STOPPING_DIST 5
 #define UNIFORM_DIST 12
 #define THRESHOLD_DIST 50
 #define DIST_DIFF (THRESHOLD_DIST - UNIFORM_DIST)
 
-//units are PWM
+// units are PWM
 #define MIN_SPEED 20
-#define FULL_SPEED (MAX_PWM/2)
 
 // delay
 #define SHORT_DELAY 20
 
-#define TURN_DELAY 1243
+// function declarations
+void avoid_obstacles();
+void slow_down();
+double check_dist(int pos);
+void turn90(int dir, double end_dist);
 
-void setup() {
-    wheel_setup();
-    ultrasonic_setup();
-    Serial.begin(9600);
-}
+int avoid_spd;
 
-void loop() {
-    slow_down();
-    double left_dist = check_dist(LEFT);
-    double right_dist = check_dist(RIGHT);
-    if (right_dist > left_dist){
-        turn90(RIGHT, right_dist);
-    } else {
-        turn90(LEFT, left_dist);
+void avoid_obstacles() {
+    wheel_reset();
+    ultrasonic_reset();
+    avoid_spd = MAX_PWM/2;
+
+    while (true) {
+        slow_down();
+        double left_dist = check_dist(LEFT);
+        double right_dist = check_dist(RIGHT);
+        if (right_dist > left_dist){
+            turn90(RIGHT, right_dist);
+        } else {
+            turn90(LEFT, left_dist);
+        }
     }
 }
 
@@ -52,11 +60,11 @@ void slow_down() {
             halt();
             break;
         } else if (dist > THRESHOLD_DIST) {
-            straight(FULL_SPEED);
+            straight(avoid_spd);
         } else if (dist < UNIFORM_DIST) {
             straight(MIN_SPEED);
         } else {
-            straight(MIN_SPEED + (FULL_SPEED - MIN_SPEED) * (dist - UNIFORM_DIST) / DIST_DIFF);
+            straight(MIN_SPEED + (avoid_spd - MIN_SPEED) * (dist - UNIFORM_DIST) / DIST_DIFF);
         }
         delay(SHORT_DELAY);
     }
@@ -73,7 +81,7 @@ double check_dist(int pos) {
 void turn90(int dir, double end_dist) {
     double goal_dist = read_dist() + ROBOT_R;
     turn_servo(180 - dir);
-    rotate(dir/180, FULL_SPEED/2);
+    rotate(dir/180, avoid_spd/2);
     while (abs(read_dist() - goal_dist) > EPS) {
         delay(SHORT_DELAY);
     }
@@ -85,3 +93,6 @@ void turn90(int dir, double end_dist) {
                 + " but expected " + String(end_dist));
     }
 }
+
+#endif
+
