@@ -8,24 +8,27 @@
 
 #include <Servo.h>
 
-// pins
+// ultrasonic and servo pins
 #define TRIG 9
 #define ECHO 8
 #define SERVO_PIN 10
 #define TSPIN A2
 
+// Servo constants
 #define SERVO_LEFT 180
 #define SERVO_RIGHT 0
 #define SERVO_MID 90
-
 #define SERVO_DELAY 50
 
+// function declarations
 void ultrasonic_setup();
+void ultrasonic_reset();
+
 void turn_servo(int);
 double read_dist();
 double read_temperature();
 
-int pos;
+int servo_pos;
 Servo motor;
 
 void ultrasonic_setup() {
@@ -33,15 +36,20 @@ void ultrasonic_setup() {
     pinMode(ECHO, INPUT);
 
     motor.attach(SERVO_PIN);
-    pos = SERVO_MID;
-    motor.write(pos);
+    servo_pos = motor.read();
+    turn_servo(SERVO_MID);
+}
+
+void ultrasonic_reset() {
+    servo_pos = motor.read();
+    turn_servo(SERVO_MID);
 }
 
 void turn_servo(int goal) {
-    int dir = (pos < goal) ? 1 : -1;
-    for ( ; pos != goal; pos += dir) {
+    int dir = (servo_pos < goal) ? 1 : -1;
+    for ( ; servo_pos != goal; servo_pos += dir) {
         // sweep
-        motor.write(pos);
+        motor.write(servo_pos);
         delay(SERVO_DELAY);
     }
 }
@@ -74,3 +82,4 @@ double read_temperature() {
 }
 
 #endif
+
