@@ -166,7 +166,8 @@ public class Gryo extends Fragment{
 
                 if (startGyro) {
                     if (thread != null) {//First check to make sure thread created
-                        thread.write("M " + orientations[1] + " " + orientations[2]);
+                        thread.write("M " + String.valueOf((int) orientations[1])+ " " +
+                                String.valueOf((int) orientations[2]) + "M");
                         //Toast.makeText(getContext(), Integer.toString((int) orientations[1]), Toast.LENGTH_SHORT).show();
                     }
                 }

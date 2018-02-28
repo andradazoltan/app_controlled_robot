@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.madrapps.pikolo.HSLColorPicker;
 import com.madrapps.pikolo.listeners.SimpleColorSelectionListener;
@@ -28,6 +29,8 @@ public class LightsActivity extends Fragment {
     private ImageButton imageButton3;
     private ImageButton imageButton4;
     private ImageButton imageButton5;
+
+    private int a, r, g, b;
 
     int colour;
 
@@ -106,7 +109,17 @@ public class LightsActivity extends Fragment {
             @Override
             public void onClick(View v){
                if (thread!=null){
-                   thread.write("L: " + colour);
+
+                   a = (colour >> 24) & 0xff; // or color >>> 24
+                   r = (colour >> 16) & 0xff;
+                   g = (colour >>  8) & 0xff;
+                   b = (colour      ) & 0xff;
+                   thread.write("L " + Integer.toString(a) + " " +
+                           Integer.toString(r) + " " + Integer.toString(g) + " "
+                           + Integer.toString(b) + "L");
+                   Toast.makeText(getContext(), "L: " + Integer.toString(a) + " " +
+                           Integer.toString(r) + " " + Integer.toString(g) + " "
+                           + Integer.toString(b) + "L", Toast.LENGTH_SHORT).show();
                }
             }
         });
