@@ -39,7 +39,15 @@ void follow_line() {
     line_spd = MAX_PWM/3;
 
     while (true) {
-        //test_vals();
+		if (Serial.available()) {
+			char state = Serial.read();
+			while (Serial.available()) {
+				Serial.read();
+			}
+			if (state != 'F') {
+				break;
+			}
+		}
 
         int left = checkBlackOrWhite(analogRead(IRPIN_L));
         int right = checkBlackOrWhite(analogRead(IRPIN_R));
@@ -90,12 +98,6 @@ void follow_line() {
 
         delay(LINE_DELAY);
     }
-}
-
-void test_vals() {
-    int val1 = analogRead(IRPIN_L);
-    int val2 = analogRead(IRPIN_R);
-    Serial.println("Left " + String(val1) + "    Right " + String(val2));
 }
 
 // TODO add docs
