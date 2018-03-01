@@ -30,15 +30,20 @@
 #define OUTLSB_Z     0x06
 #define DATA_CFG     0x0E
 #define PL_CFG       0x11
+#define CTRLREG1     0x2A
 #define CTRLREG2     0x2B
 
-float x_accel, y_accel;
+int x_accel, y_accel;
 
 char tosend[BUFFER_SIZE] = "HELLO";
 char toreceive[BUFFER_SIZE];
 
+char xaccel[1]; 
+char yaccel[1];
+
 void setup() {
   Wire.begin();
+  Serial.begin(9600);
 
   //Initialie serial pins
   pinMode(commIN, INPUT);
@@ -48,12 +53,39 @@ void setup() {
 
   //Initialize LCD pins 
   DDRB |= B11111111;  
-  
-  lcd_init();
+
   accel_setup();
+  lcd_init();
 }
 
 void loop() {
+  accel_readX();
+  accel_readY();
+  char xaccel[10]; 
+  char yaccel[10];
+  convert(xaccel, 0, x_accel);
+  convert(yaccel, 0, y_accel);
+
+
+  to_write(xaccel);
+  lcd_command(SECONDROW);
+  to_write(yaccel);
+  delay(1000);
+  lcdclear();
+}
+
+int convert(char to[], int start, int value) {
+  char digits[10];
+  int len = 0;
+  while (value > 0) {
+    digits[len++] = value % 10 + '0';
+    value /= 10;
+  }
+  for (int i = 0; i < len; i++) {
+    to[start+i] = digits[len-1-i];
+  }
+  to[start + len] = '\0';
+  return start + len;
 }
 
 //ACCELEROMETER FUNCTIONS -------------------------------------------
@@ -70,6 +102,7 @@ void accel_setup() {
   accel_writeReg(DATA_CFG, 0b01);
 
   accel_writeReg(PL_CFG, 0x40);
+  accel_writeReg(CTRLREG1, 0x01|0x04);
 }
 
 /*
@@ -116,7 +149,7 @@ void accel_readX() {
   Wire.requestFrom(addr, 6);
   x = Wire.read(); x <<= 8; x |= Wire.read(); x >>= 2;
 
-  x_accel = (float)x/2058*9.80665F;
+  x_accel = x/2058*9.80665F;
 }
 
 /*
@@ -133,7 +166,7 @@ void accel_readY() {
   Wire.requestFrom(addr, 6);
   y = Wire.read(); y <<= 8; y |= Wire.read(); y >>= 2;
 
-  y_accel = (float)y/2048*9.80665F;
+  y_accel = y/2048*9.80665F;
 }
 
 //SERIAL COMMUNICATION ISR -------------------------------------------
@@ -263,6 +296,9 @@ void lcd_init(){
   
   //Cursor blinking off
   lcd_command(0xc);
+
+  delay(2000);
+  lcdclear();
 }
 
 /*
@@ -313,7 +349,7 @@ void lcd_command(byte cmd){
   PORTB |= higherbits << 2;
 
   //Send LOW on RS pin to select command register
-  PORTB &= ~(1 << RS);
+  PORTB &= ~(1);
 
   //Trigger rising edge on EN pin
   PORTB |= (1 << 1);
