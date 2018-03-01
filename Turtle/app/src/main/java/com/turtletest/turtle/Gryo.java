@@ -8,7 +8,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,11 @@ import java.lang.Math;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.Toast;
 
+/** Gyro is a child fragment of BluetoothActivity
+ *  Allows the user to use the phone as a joystick to control the robot
+ */
 public class Gryo extends Fragment{
+    //GUI Textviews
     TextView xaxis;
     TextView yaxis;
     TextView zaxis;
@@ -27,26 +30,23 @@ public class Gryo extends Fragment{
     TextView yorientation;
     TextView zorientation;
 
-    private Button startstopBtn;
+    //Robot speed and radius variables
+    int maxRadius = 300;
+    int maxSpeed = 255;
 
+    //Fragment GUI Components
+    private Button startstopBtn;
     ImageView innerCircle;
     ImageView outerCircle;
 
-    private float[] orientations = new float[3];
+    private float[] orientations = new float[3]; //rotation in x, y, z plane
+    private boolean startGyro = false;           //boolean that tracks when button is pressed
+    int[] location = new int[2];                 //center of outer circle
+    int radius;                                  //radius of outer circle
+    int vtilt;                                   //y coordinate of inner circle
+    int htilt;                                   //x coordinate of inner circle
 
-   private boolean startGyro = false;
-
-    int[] location = new int[2];
-    int radius;
-
-    int diameter;
-
-    int vtilt;
-    int htilt;
-
-    int maxSpeed = 0;
-
-    private ConnectedThread thread;
+    private ConnectedThread thread;              //BluetoothActivity thread
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState){
@@ -57,28 +57,24 @@ public class Gryo extends Fragment{
     public void onViewCreated(View view, Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
+        //Set GUI Components
         startstopBtn = view.findViewById(R.id.startstopbtn);
-
-        xaxis = (TextView) view.findViewById(R.id.xaxis);
-        yaxis = (TextView) view.findViewById(R.id.yaxis);
-        zaxis = (TextView) view.findViewById(R.id.zaxis);
-
-        xorientation = (TextView) view.findViewById(R.id.xorientation);
-        yorientation = (TextView) view.findViewById(R.id.yorientation);
-        zorientation = (TextView) view.findViewById(R.id.zorientation);
-
-        innerCircle = (ImageView) view.findViewById(R.id.innercircle);
-        outerCircle = (ImageView) view.findViewById(R.id.outercircle);
+        xaxis = view.findViewById(R.id.xaxis);
+        yaxis = view.findViewById(R.id.yaxis);
+        zaxis = view.findViewById(R.id.zaxis);
+        xorientation = view.findViewById(R.id.xorientation);
+        yorientation = view.findViewById(R.id.yorientation);
+        zorientation = view.findViewById(R.id.zorientation);
+        innerCircle = view.findViewById(R.id.innercircle);
+        outerCircle = view.findViewById(R.id.outercircle);
         innerCircle.setVisibility(View.VISIBLE);
-
     }
-
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState){
         super.onActivityCreated(savedInstanceState);
 
-
+        //Set up sensor variables
         SensorManager sensorManager =
                 (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         Sensor gyroscopeSensor =
@@ -86,19 +82,15 @@ public class Gryo extends Fragment{
         Sensor rotationVectorSensor =
                 sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
+        //Get bluetooth thread from Activity
         BluetoothActivity act = (BluetoothActivity) getActivity();
-
         thread = act.getThread();
 
-
+        //Find outer circle coordinates relative to screen size
         outerCircle.getViewTreeObserver().addOnGlobalLayoutListener(new OnGlobalLayoutListener(){
             public void onGlobalLayout() {
                 Rect rectf = new Rect();
                 Rect recti = new Rect();
-
-                int height = outerCircle.getHeight();
-                int width = outerCircle.getWidth();
-                diameter = outerCircle.getHeight();
 
                 outerCircle.getLocalVisibleRect(rectf);
                 innerCircle.getLocalVisibleRect(recti);
@@ -108,9 +100,9 @@ public class Gryo extends Fragment{
 
                 radius = (int)(rectf.height()/2.5);
 
-                innerCircle.setX(location[0]);
+                innerCircle.setX(location[0]);  //sets innerCircle to center of outer Circle
                 innerCircle.setY(location[1]);
-                //don't forget to remove the listener to prevent being called again by future layout events:
+                //Remove the listener to prevent being called again by future layout events:
                 outerCircle.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             }
         });
@@ -118,11 +110,10 @@ public class Gryo extends Fragment{
         SensorEventListener gyroscopeSensorListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent sensorEvent) {
-                xaxis.setText(Float.toString(sensorEvent.values[0]));
+                xaxis.setText(Float.toString(sensorEvent.values[0]));   //Display sensor data on screen
                 yaxis.setText(Float.toString(sensorEvent.values[1]));
                 zaxis.setText(Float.toString(sensorEvent.values[2]));
             }
-
             @Override
             public void onAccuracyChanged(Sensor sensor, int i) {
             }
@@ -145,7 +136,7 @@ public class Gryo extends Fragment{
                 // Convert to orientations
                 SensorManager.getOrientation(remappedRotationMatrix, orientations);
 
-
+                //Convert sensor data to degrees
                 for(int i = 0; i < 3; i++) {
                     orientations[i] = (float)(Math.toDegrees(orientations[i]));
                 }
@@ -154,8 +145,6 @@ public class Gryo extends Fragment{
                 yorientation.setText(Float.toString(orientations[1]));
                 zorientation.setText(Float.toString(orientations[2]));
 
-
-                //Toast.makeText(getContext(), "gryo", Toast.LENGTH_SHORT).show();
                 vtilt = location[1] - Math.round(Math.max(-90,Math.min(90,orientations[1]/90)) * (radius - 5));
                 htilt = location[0] - 5 + Math.round(Math.max(-90,Math.min(90,orientations[2]/90)) * (radius - 5));
 
@@ -164,21 +153,22 @@ public class Gryo extends Fragment{
                     innerCircle.setY(vtilt);
                 }
 
+                float x = (maxSpeed*(orientations[1]))/90;
+                float z = (maxRadius*(orientations[2]))/90;
+
+                // If button was pressed to start, commence sending sensor data to Arduino, otherwise ignore
                 if (startGyro) {
                     if (thread != null) {//First check to make sure thread created
-                        thread.write("M " + String.valueOf((int) orientations[1])+ " " +
-                                String.valueOf((int) orientations[2]) + "M");
-                        //Toast.makeText(getContext(), Integer.toString((int) orientations[1]), Toast.LENGTH_SHORT).show();
+                        thread.write("M " + String.valueOf((int) x)+ " " +
+                                String.valueOf((int) z) + "M");
                     }
                 }
-
             }
-
             @Override
             public void onAccuracyChanged(Sensor sensor, int i) {
             }
         };
-
+        //Start sending sensor data to phone on button click
         startstopBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
@@ -186,7 +176,6 @@ public class Gryo extends Fragment{
                 Toast.makeText(getContext(), String.valueOf(startGyro), Toast.LENGTH_SHORT).show();
             }
         });
-
 
 // Register it
         sensorManager.registerListener(rvListener,
@@ -196,7 +185,4 @@ public class Gryo extends Fragment{
         sensorManager.registerListener(gyroscopeSensorListener,
                 gyroscopeSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
-
-
-
 }

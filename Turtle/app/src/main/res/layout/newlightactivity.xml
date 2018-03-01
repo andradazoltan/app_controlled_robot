@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  LightsActivity XML Code
+  Colour Slider from https://github.com/Madrapps/Pikolo
+  -->
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:pikolo="http://schemas.android.com/apk/res-auto"

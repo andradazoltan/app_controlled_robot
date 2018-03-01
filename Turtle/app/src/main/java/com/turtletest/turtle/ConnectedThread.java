@@ -2,17 +2,14 @@ package com.turtletest.turtle;
 
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.os.SystemClock;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-/**
- * Created by Grace on 2018-02-19.
+/** ConnectedThread class for BluetoothActivity
  */
-
 
 public class ConnectedThread extends Thread {
     private final BluetoothSocket mmSocket;
@@ -20,7 +17,6 @@ public class ConnectedThread extends Thread {
     private final OutputStream mmOutStream;
 
     private Handler mHandler;
-
 
     public ConnectedThread(BluetoothSocket socket) {
         mmSocket = socket;

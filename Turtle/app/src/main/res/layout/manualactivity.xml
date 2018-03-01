@@ -54,7 +54,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textColor="@color/silver"
-                    android:text="Check connection or pair new device."
+                    android:text="Follows course outlined with black tape."
                     android:padding="5dp"/>
             </LinearLayout>
 
@@ -102,7 +102,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textColor="@color/silver"
-                    android:text="Check connection or pair new device."
+                    android:text="Scans for obstacles and avoids collisions."
                     android:padding="5dp"/>
             </LinearLayout>
 
