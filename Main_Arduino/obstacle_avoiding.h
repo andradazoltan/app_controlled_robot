@@ -42,6 +42,16 @@ void avoid_obstacles() {
     avoid_spd = MAX_PWM/2;
 
     while (true) {
+		if (Serial.available()) {
+			char state = Serial.read();
+			while (Serial.available()) {
+				Serial.read();
+			}
+			if (state != 'O') {
+				break;
+			}
+		}
+
         slow_down();
         double left_dist = check_dist(LEFT);
         double right_dist = check_dist(RIGHT);
