@@ -4,28 +4,28 @@
  *
  * Usage: 
  * void turn90Deg(int dir); [deprecated]
- * 			Rotates on the spot by 90 degrees
- * 			- dir is the direction. (LEFT, RIGHT)
+ *          Rotates on the spot by 90 degrees
+ *          - dir is the direction. (LEFT, RIGHT)
  * void rotate(int dir, int v);
- * 			Rotates on the spot
- * 			- dir is the direction. (LEFT, RIGHT)
- * 			- v is speed. (0 to 255) in PWM
+ *          Rotates on the spot
+ *          - dir is the direction. (LEFT, RIGHT)
+ *          - v is speed. (0 to 255) in PWM
  * void straight(int v);
- * 			Moves straight
- * 			- v is speed. (0 to 255) in PWM
+ *          Moves straight
+ *          - v is speed. (0 to 255) in PWM
  * void smoothTurn(double radius, int dir, int v);
- * 			Turns in a circular arc.
- * 			- radius is radius of inner wheel (0cm to large)
- * 			- v is speed of outer wheel. (0 to 255) in PWM
- * 			- dir is direction of turn. (LEFT, RIGHT)
+ *          Turns in a circular arc.
+ *          - radius is radius of inner wheel (0cm to large)
+ *          - v is speed of outer wheel. (0 to 255) in PWM
+ *          - dir is direction of turn. (LEFT, RIGHT)
  * void setDirection(int dir);
- * 			flips the direction of movement until setDirection is called again
- * 			- dir is the direction of the movement. (FORWARD, BACKWARD)
+ *          flips the direction of movement until setDirection is called again
+ *          - dir is the direction of the movement. (FORWARD, BACKWARD)
  * void slowDown(int dist, int v); // probably BROKEN!
- * 			Slows to a stop in front of the obstacle, no effect if dist > 50cm
- * 			Note: only edits PWM
- * 			- dist is the distance to the obstacle
- * 			- v is the max speed at dist > 50cm. (0 to 255) in PWM
+ *          Slows to a stop in front of the obstacle, no effect if dist > 50cm
+ *          Note: only edits PWM
+ *          - dist is the distance to the obstacle
+ *          - v is the max speed at dist > 50cm. (0 to 255) in PWM
  * void halt();
  *      stops the robot
  */
@@ -45,6 +45,7 @@
 #define FORWARD 1
 #define BACKWARD 0
 #define MAX_PWM 255
+#define MAGIC 0.9125
 
 // function declarations
 void wheel_setup();
@@ -64,20 +65,20 @@ int roboDirection;
 
 // initialize pins and direction
 void wheel_setup() {
-	pinMode(M1, OUTPUT);  
-	pinMode(M2, OUTPUT);
-	roboDirection = FORWARD;
+    pinMode(M1, OUTPUT);  
+    pinMode(M2, OUTPUT);
+    roboDirection = FORWARD;
 }
 
 void wheel_reset() {
-	roboDirection = FORWARD;
-	halt();
+    roboDirection = FORWARD;
+    halt();
 }
 
 //set PWM to control speed of wheels
 void setPWM(int velociraptor) {
-	analogWrite(E1, velociraptor);
-	analogWrite(E2, velociraptor);
+    analogWrite(E1, velociraptor * MAGIC);
+    analogWrite(E2, velociraptor);
 }
 
 // rotate on spot
@@ -89,12 +90,12 @@ void rotate(int dir, int val) {
 
 //turn LEFT or RIGHT by 90 degrees [deprecated]
 void turn90Deg(int dir){ 
-	digitalWrite(M1, dir);
-	digitalWrite(M2, dir);
-	//may need to change values
-	setPWM(175);
-	delay(1000);
-	setPWM(0);
+    digitalWrite(M1, dir);
+    digitalWrite(M2, dir);
+    //may need to change values
+    setPWM(175);
+    delay(1000);
+    setPWM(0);
 }
 
 // 50cm --> MAX_PWM

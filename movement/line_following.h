@@ -36,18 +36,18 @@ void follow_line() {
     wheel_reset();
     calibrate();
     curvature = 0;
-    line_spd = MAX_PWM/3;
+    line_spd = MAX_PWM/2;
 
     while (true) {
-		if (Serial.available()) {
-			char state = Serial.read();
-			while (Serial.available()) {
-				Serial.read();
-			}
-			if (state != 'F') {
-				break;
-			}
-		}
+        if (Serial.available()) {
+            char state = Serial.read();
+            while (Serial.available()) {
+                Serial.read();
+            }
+            if (state != 'F') {
+                break;
+            }
+        }
 
         int left = checkBlackOrWhite(analogRead(IRPIN_L));
         int right = checkBlackOrWhite(analogRead(IRPIN_R));
@@ -77,24 +77,24 @@ void follow_line() {
         else if (curvature < -4) {
             //Serial.println("PANIC! right");
             curvature = -(MAX_CURV+1);
-			smoothTurn(0, RIGHT, line_spd);
+            smoothTurn(0, RIGHT, line_spd);
             //rotate(RIGHT, line_spd);
         }
 
-		// white white, rotate left
+        // white white, rotate left
         else if (curvature > 8) {
             //Serial.println("PANIC! left");
             curvature = MAX_CURV+1;
-			smoothTurn(0, LEFT, line_spd);
+            smoothTurn(0, LEFT, line_spd);
             //rotate(LEFT, line_spd);
         }
 
-		// white white, line lost, stop
-		else {
-			//Serial.println("LINE LOST");
-			halt();
-			break;
-		}
+        // white white, line lost, stop
+        else {
+            //Serial.println("LINE LOST");
+            halt();
+            break;
+        }
 
         delay(LINE_DELAY);
     }
