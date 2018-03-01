@@ -9,6 +9,7 @@ void setup() {
 }
 
 void loop() {  
+  int radius, veloc, r, v = 0;
   int i = 1;
   int maxS = 1;
 
@@ -19,7 +20,7 @@ void loop() {
       maxS = 18;
     }
     else if(string[0] == 'M') {
-      maxS = 10;
+      maxS = 12;
     }
     else if(string[0] == 'F') {
       maxS = 1;
@@ -39,23 +40,14 @@ void loop() {
       break;
   }
 
-  if(string[0] == 'L') {
-    Serial.println(string);
-    Serial.println("LED");
-  }
-  else if(string[0] == 'M') {
-    Serial.println(string);
-     Serial.println("MANUAL");
-  }
-  else if(string[0] == 'F') {
-    Serial.println(string);
-     Serial.println("FOLLOW");
-  }
-  else if(string[0] == 'O') {
-    Serial.println(string);
-    Serial.println("OBSTACLE");
-  }
+  veloc = string[2]*10 + string[3];
+  radius = (string[9]-'0')*10 + (string[10]-'0');
+  v = string[5];
+  r = string[7];
 
+  
+Serial.println(string);
+Serial.println(radius);
   clearArray(string, 10);
 }
 
@@ -64,4 +56,3 @@ void clearArray(char arr[], int ln) {
     arr[i] = '\0';
   }
 }
-
