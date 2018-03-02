@@ -4,7 +4,12 @@
 #define commIN 7
 #define commOUT 4
 #define interruptPin 2
-#define BUFFER_SIZE 6
+#define BUFFER_SIZE 11
+
+//define LED pins
+#define R 6
+#define G 3
+#define B 5
 
 //define LCD pins
 #define RS 8
@@ -33,23 +38,29 @@
 #define CTRLREG1     0x2A
 #define CTRLREG2     0x2B
 
-int x_accel, y_accel;
+float x_accel, y_accel;
 
-char tosend[BUFFER_SIZE] = "HELLO";
+char tosend[BUFFER_SIZE];
 char toreceive[BUFFER_SIZE];
+boolean newD = false;
 
-char xaccel[1]; 
-char yaccel[1];
+char xaccel[8]; 
+char yaccel[8];
 
 void setup() {
   Wire.begin();
   Serial.begin(9600);
 
-  //Initialie serial pins
+  //Initialize serial pins
   pinMode(commIN, INPUT);
   pinMode(commOUT, OUTPUT);
   pinMode(interruptPin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(interruptPin), communication, RISING);
+
+  //Initialize LED pins
+  pinMode (R, OUTPUT);
+  pinMode (G, OUTPUT);
+  pinMode (B, OUTPUT);
 
   //Initialize LCD pins 
   DDRB |= B11111111;  
@@ -61,31 +72,37 @@ void setup() {
 void loop() {
   accel_readX();
   accel_readY();
-  char xaccel[10]; 
-  char yaccel[10];
-  convert(xaccel, 0, x_accel);
-  convert(yaccel, 0, y_accel);
-
+  convert(xaccel, x_accel<0, abs(x_accel));
+  convert(yaccel, y_accel<0, abs(y_accel));  
 
   to_write(xaccel);
   lcd_command(SECONDROW);
-  to_write(yaccel);
+  to_write(yaccel);    
+
+  if(newD == true)
+    LED_control();
+
   delay(1000);
   lcdclear();
 }
 
-int convert(char to[], int start, int value) {
-  char digits[10];
-  int len = 0;
-  while (value > 0) {
-    digits[len++] = value % 10 + '0';
-    value /= 10;
-  }
-  for (int i = 0; i < len; i++) {
-    to[start+i] = digits[len-1-i];
-  }
-  to[start + len] = '\0';
-  return start + len;
+
+//LED CONTROL --------------------------------------------------------
+/*
+ * Function is called if new LED control data is received from the first
+ * Arduino. The LED PWM pins are then set based on the received values.
+ */
+void LED_control () {
+  int r,g,b;
+  r = (toreceive[2]-'0')*10 + (toreceive[3]-'0');
+  g = (toreceive[5]-'0')*10 + (toreceive[6]-'0');
+  b = (toreceive[8]-'0')*10 + (toreceive[9]-'0');
+
+
+  analogWrite(R, r);
+  analogWrite(G, g);
+  analogWrite(B, b);
+  newD = false;
 }
 
 //ACCELEROMETER FUNCTIONS -------------------------------------------
@@ -149,7 +166,7 @@ void accel_readX() {
   Wire.requestFrom(addr, 6);
   x = Wire.read(); x <<= 8; x |= Wire.read(); x >>= 2;
 
-  x_accel = x/2058*9.80665F;
+  x_accel = (float)x/2058*9.80665F;
 }
 
 /*
@@ -166,7 +183,40 @@ void accel_readY() {
   Wire.requestFrom(addr, 6);
   y = Wire.read(); y <<= 8; y |= Wire.read(); y >>= 2;
 
-  y_accel = y/2048*9.80665F;
+  y_accel = (float)y/2048*9.80665F;
+}
+
+/*
+ * Funciton takes in a float and converts it to a char array;
+ * only considers the float up to 3 significant figures.
+ * 
+ * Parameter: converted - array to store the converted values in
+ * Parameter: value - the float value to convert
+ */
+void convert(char converted[], boolean neg, float value) {
+  char digits[6];
+  int len = 0;
+  int rounded = (int)(value *1000);
+  
+  while (rounded > 0) {
+    if(len == 3)
+      digits[len++] = '.';
+    else {
+      digits[len++] = rounded % 10 + '0';
+      value /= 10;
+    }
+  }
+  for (int i = 0; i < len; i++) {
+    coverted[i] = digits[len-1-i];
+  }
+  coverted[len] = '\0';
+
+  if(neg) {
+    for(int i = len; i > 0; i++) {
+      converted[i] = conveted[i-1];
+    }
+    converted[0] = '-';
+  }
 }
 
 //SERIAL COMMUNICATION ISR -------------------------------------------
@@ -207,6 +257,7 @@ void communication () {
       temp = 0;
       delayMicroseconds(100);
     }
+    newD = true;
   } 
   digitalWrite(commOUT, LOW);
 }
