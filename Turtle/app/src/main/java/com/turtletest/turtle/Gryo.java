@@ -156,11 +156,20 @@ public class Gryo extends Fragment{
                 float x = (maxSpeed*(orientations[1]))/90;
                 float z = (maxRadius*(orientations[2]))/90;
 
+                int dirx = (orientations[1] >= 0)? 1:0;
+                int dirz = (orientations[2] >= 0)? 1:0;
+
                 // If button was pressed to start, commence sending sensor data to Arduino, otherwise ignore
                 if (startGyro) {
                     if (thread != null) {//First check to make sure thread created
-                        thread.write("M " + String.valueOf((int) x)+ " " +
-                                String.valueOf((int) z) + "M");
+                        thread.write("M " + ((Math.abs(orientations[1]) < 10)?
+                                ("0" + String.valueOf((int) Math.abs(orientations[1]))):
+                                String.valueOf((int) Math.abs(orientations[1])))+ " " +
+                                String.valueOf(dirx)+ " " + String.valueOf(dirz) + " "
+                                 + ((Math.abs(orientations[2]) < 10)?
+                                ("0" + String.valueOf((int) Math.abs(orientations[2]))):
+                                String.valueOf((int) Math.abs(orientations[2])))
+                                + "M");
                     }
                 }
             }

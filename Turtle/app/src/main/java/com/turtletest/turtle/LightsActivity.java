@@ -121,9 +121,9 @@ public class LightsActivity extends Fragment {
                    g = (50* (colour >>  8) & 0xff)/255;
                    b = (50* (colour      ) & 0xff)/255;
 
-                   thread.write("L " + Integer.toString(a) + " " +
-                           Integer.toString(r) + " " + Integer.toString(g) + " "
-                           + Integer.toString(b) + "L");
+                   thread.write("L " + ((r < 10)? "0" + Integer.toString(r): Integer.toString(r)) +
+                           " " + ((g < 10)? "0" + Integer.toString(g): Integer.toString(g)) + " "
+                           + ((b < 10)? "0" + Integer.toString(b): Integer.toString(b) + "L"));
 
                    //Display data sent to Arduino on app for debugging
                    Toast.makeText(getContext(), "L: " + Integer.toString(a) + " " +
