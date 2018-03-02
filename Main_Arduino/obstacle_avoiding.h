@@ -1,6 +1,6 @@
 /**
- * CPEN 291 obstacle avoiding SEVERELY BROKEN code, UNTESTED, use and pray
- * We follow the left edge of a black tape on a white background.
+ * Using this file the robot is controlled using the ultrasonic sensor to
+ * navigate around a series of obstacles without hitting them
  */
 
 #ifndef OBSTACLE_AVOIDING_H
@@ -9,99 +9,124 @@
 #include "wheelZ.h"
 #include "ultrasonic_sensor.h"
 
-// TODO add docs
-
-// robot dimensions in centimeters
+//define robot dimension (in cm)
 #define ROBOT_R 9.5
 
-#define EPS 1
-
-// units are cm
+//define distance variables (in cm)
 #define STOPPING_DIST 5
 #define UNIFORM_DIST 12
 #define THRESHOLD_DIST 50
 #define DIST_DIFF (THRESHOLD_DIST - UNIFORM_DIST)
 
-// units are PWM
-#define MIN_SPEED 20
-
-// delay
+//define miscellaneous variables
 #define AVOID_DELAY 20
+#define EPS 0.1
 
-// function declarations
-void avoid_obstacles();
+//function declarations
+char avoid_obstacles();
 void slow_down();
 double check_dist(int pos);
-void turn90(int dir, double end_dist);
+void turn90(int dir);
 
-int avoid_spd;
+int avoid_spd, min_spd;
 
-void avoid_obstacles() {
-    wheel_reset();
-    ultrasonic_reset();
-    avoid_spd = MAX_PWM/2;
+/*
+ * Function loops to continually check for obstacles using an ultrasonic
+ * sensor (moved by a servo motor) and maneuver the robot around any found 
+ * obstacles.
+ * 
+ * Returns: character that represents the next state for the
+ *        robot to be in
+ */
+char avoid_obstacles() {
+  wheel_reset();
+  ultrasonic_reset();
+  avoid_spd = MAX_PWM/2;
+  min_spd = MAX_PWM/3;
 
-    while (true) {
-		if (Serial.available()) {
-			char state = Serial.read();
-			while (Serial.available()) {
-				Serial.read();
-			}
-			if (state != 'O') {
-				break;
-			}
-		}
+  while (true) {
+    slow_down();
+    double left_dist = check_dist(SERVO_LEFT);
+    double right_dist = check_dist(SERVO_RIGHT);
 
-        slow_down();
-        double left_dist = check_dist(LEFT);
-        double right_dist = check_dist(RIGHT);
-        if (right_dist > left_dist){
-            turn90(RIGHT, right_dist);
-        } else {
-            turn90(LEFT, left_dist);
-        }
+    //if an object is closer on the left side, turn right to avoid
+    if (right_dist > left_dist)
+      turn90(RIGHT, right_dist);
+
+    //if an object is closer on the right side, turn left to avoid
+    else
+      turn90(LEFT, left_dist);
+
+    //Check if state of robot has been changed by phone
+    if (Serial.available()) {
+      char state = Serial.read();
+      while (Serial.available())        //continue reading until the serial buffer clears
+        Serial.read();
+      if (state != 'O')
+        return state;
     }
+  }
 }
 
+
+/*
+ * Controls the robot to move forward at different speeds until
+ * it encounters an object. The closer it gets to the object, the robot
+ * slows down until a threshold distance is reached.
+ */
 void slow_down() {
-    while (true) {
-        double dist = read_dist();
-        if (dist <= STOPPING_DIST) {
-            halt();
-            break;
-        } else if (dist > THRESHOLD_DIST) {
-            straight(avoid_spd);
-        } else if (dist < UNIFORM_DIST) {
-            straight(MIN_SPEED);
-        } else {
-            straight(MIN_SPEED + (avoid_spd - MIN_SPEED) * (dist - UNIFORM_DIST) / DIST_DIFF);
-        }
-        delay(AVOID_DELAY);
-    }
-}
-
-double check_dist(int pos) {
-    turn_servo(pos);
+  while (true) {
     double dist = read_dist();
+    if (dist <= STOPPING_DIST) {
+      halt();
+      break;
+    } 
+    else if (dist > THRESHOLD_DIST)
+      straight(avoid_spd);
+    else if (dist < UNIFORM_DIST)
+      straight(min_spd);
+    else
+      straight(min_spd + (avoid_spd - min_spd) * (dist - UNIFORM_DIST) / DIST_DIFF);
+
     delay(AVOID_DELAY);
-    turn_servo(SERVO_MID);
-    return dist;
+  }
 }
 
-void turn90(int dir, double end_dist) {
-    double goal_dist = read_dist() + ROBOT_R;
-    turn_servo(180 - dir);
-    rotate(dir/180, avoid_spd/2);
-    while (abs(read_dist() - goal_dist) > EPS) {
-        delay(AVOID_DELAY);
-    }
-    halt();
 
-    turn_servo(SERVO_MID);
-    if (abs((read_dist() - ROBOT_R) - end_dist) > 1) {
-        Serial.println("PANIC " + String(read_dist() + ROBOT_R) 
-                + " but expected " + String(end_dist));
-    }
+/* 
+ * Checks the distance read on the ultrasonic sensor at a specified
+ * position of the servo motor.
+ * 
+ * Parameter: pos - angle in degrees of the servo motor
+ * Returns: distance read on ultrasonic sensor
+ */
+double check_dist(int pos) {
+  turn_servo(pos);
+  double dist = read_dist();
+  delay(AVOID_DELAY);
+  
+  turn_servo(SERVO_MID);
+  return dist;
+}
+
+
+/*
+ * Turn robot 90 degrees left or right to avoid obstacle, turn servo motor
+ * opposite direction to check at what point the robot has avoided the 
+ * obstacle. If at any point robot can move without hitting the obstacle,
+ * stop turning and return back to main roop.
+ * 
+ * Parameter: dir - direction to turn (left or right) 
+ */
+void turn90(int dir) {
+  double goal_dist = read_dist() + ROBOT_R;
+  turn_servo(180 - dir);
+  rotate(dir/180, min_spd);
+  while (abs(read_dist() - goal_dist) > EPS)
+    delay(AVOID_DELAY);
+  
+  halt();
+  turn_servo(SERVO_MID);
 }
 
 #endif

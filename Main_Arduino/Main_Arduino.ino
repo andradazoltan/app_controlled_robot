@@ -95,6 +95,11 @@ int manual () {
         break;
     }
 
+    radius = string[2]*10 + string[3];
+    veloc = string[5]*10 + string[6];
+    
+
+
     for (i = 2; string[i] != ' '; i++)
       radius += (string[i] - '0')*pow(10,(i-2)); 
     for(int y = i; string[y] != 'M'; y++)
