@@ -59,9 +59,9 @@ public class BluetoothActivity extends FragmentActivity{
     private CardView obstacleBtn;
 
     //Lists of GUI Components arranged by activity and fragments
-    private ArrayList<Button> btGUI;
-    private ArrayList<CardView> fragGUI;
-    private ArrayList<CardView> actionGUI;
+    private ArrayList<Button> btGUI = new ArrayList<Button>();
+    private ArrayList<CardView> fragGUI = new ArrayList<CardView>();
+    private ArrayList<CardView> actionGUI = new ArrayList<CardView>();
 
     //Associated fragments GUI components
     private CardView aboutUsButton;

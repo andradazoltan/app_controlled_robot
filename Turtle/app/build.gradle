@@ -16,6 +16,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -27,5 +32,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:cardview-v7:26.1.0'
     testCompile 'junit:junit:4.12'
+    testCompile "org.robolectric:robolectric:3.7.1"
     compile 'com.github.madrapps:pikolo:1.1.6'
 }

@@ -45,9 +45,9 @@ public class ManualActivity extends Fragment{
             public void onClick(View v){
                 //If bluetooth is connected, send data to Arduino
                 if (mConnectedThread!= null) {
-                    mConnectedThread.write("F");
+                    mConnectedThread.write("FF");
                     //Display sent data for debugging
-                    Toast.makeText(getContext(), "F", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "FF", Toast.LENGTH_SHORT).show();
 
                 }
             }
@@ -57,9 +57,9 @@ public class ManualActivity extends Fragment{
             public void onClick(View v){
                 //If bluetooth is connected, send data to Arduino
                 if (mConnectedThread!= null) {
-                    mConnectedThread.write("O");
+                    mConnectedThread.write("OO");
                     //Display sent data for debugging
-                    Toast.makeText(getContext(),"O", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),"OO", Toast.LENGTH_SHORT).show();
                 }
             }
         });
