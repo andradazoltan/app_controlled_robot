@@ -19,23 +19,19 @@ void setup() {
 void loop() {
   int i = 1;
   int maxS = 1;
-  int state, next_state;
+  char state, next_state;
 
   while(!Serial.available());
   string[0] = (char)Serial.read();
 
-    if(string[0] == 'L') {
-      maxS = 18;
-    }
-    else if(string[0] == 'M') {
-      maxS = 10;
-    }
-    else if(string[0] == 'F') {
-      maxS = 1;
-    }
-    else if(string[0] == 'O') {
-      maxS = 1;
-    }    
+  if(string[0] == 'L')
+    maxS = 18;
+  else if(string[0] == 'M')
+    maxS = 10;
+  else if(string[0] == 'F')
+    maxS = 1;
+  else if(string[0] == 'O')
+    maxS = 1;   
   
   while(i<maxS) { 
     state = 0;
@@ -48,20 +44,17 @@ void loop() {
       break;
   }
   
-  if(string[0] == 'L') {
+  if(string[0] == 'L' || next_state == 'L') {
     
   }
-  else if(string[0] == 'M') {
+  else if(string[0] == 'M' || next_state == 'M')
     next_state = manual();
-  }
-  else if(string[0] == 'F') {
-   // next_state = (int)line_following();
-  }
-  else if(string[0] == 'O') {
-   // next_state = obstacle_avoiding();
-  }
+  else if(string[0] == 'F' || next_state == 'F')
+    next_state = line_following();
+  else if(string[0] == 'O' || next_state == 'O')
+    next_state = obstacle_avoiding();
 
-  clearArray(string, 10);
+  clearArray(string, 20);
 }
 
 void clearArray(char arr[], int ln) {
@@ -70,21 +63,22 @@ void clearArray(char arr[], int ln) {
   }
 }
 
-int manual () {
-  int state, radius, veloc = 0;
+char manual () {
+  int radius, veloc, r, v = 0;
+  char state;
 
   wheel_reset();
    
   while (true) {
-    //Check if state of robot has been changed by phone
-    if (Serial.available())
-      char state = Serial.read();
+    while(!Serial.available());
+    state = Serial.read();
 
+    //Check if state of robot has been changed by phone
     if (state != 'M')
       return state;
 
     int i = 0;
-    while(i<10) { 
+    while(i<12) { 
       state = 0;
       if (Serial.available()) {//check if there's any data sent from the remote bluetooth shield
         state = (char)Serial.read();
@@ -95,30 +89,25 @@ int manual () {
         break;
     }
 
-    radius = string[2]*10 + string[3];
-    veloc = string[5]*10 + string[6];
-    
-
-
-    for (i = 2; string[i] != ' '; i++)
-      radius += (string[i] - '0')*pow(10,(i-2)); 
-    for(int y = i; string[y] != 'M'; y++)
-      veloc += (string[y] - '0')*pow(10,(y-i));
+    veloc = (string[2]-'0')*10 + (string[3]-'0');
+    radius = (string[9]-'0')*10 + (string[10]-'0');
+    v = string[5];
+    r = string[7];
 
     if(radius == 0)
       straight(veloc);
     else {
-      if(veloc < 0)
+      if(v == 0)
         setDirection(0);
       else
         setDirection(1);
 
-      if(radius < 0)
-        smoothTurn((double)abs(radius), 1, abs(veloc));
+      if(r == 0)
+        smoothTurn((double)radius, 1, veloc);
       else
-        smoothTurn((double)radius, 0, abs(veloc));
+        smoothTurn((double)radius, 0, veloc);
     }
-      
+    clearArray(string, 20);  
   } 
 }
 
