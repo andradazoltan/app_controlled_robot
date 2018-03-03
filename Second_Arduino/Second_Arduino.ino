@@ -74,7 +74,8 @@ void loop() {
   accel_readY();
   convert(xaccel, x_accel<0, abs(x_accel));
   convert(yaccel, y_accel<0, abs(y_accel));  
-
+Serial.println(x_accel);
+Serial.println(y_accel);
   to_write(xaccel);
   lcd_command(SECONDROW);
   to_write(yaccel);    
@@ -114,7 +115,6 @@ void LED_control () {
  */
 void accel_setup() {
   accel_writeReg(CTRLREG2, 0x40);
-  while(accel_readReg(CTRLREG2) & 0x40);
   
   accel_writeReg(DATA_CFG, 0b01);
 
@@ -207,13 +207,13 @@ void convert(char converted[], boolean neg, float value) {
     }
   }
   for (int i = 0; i < len; i++) {
-    coverted[i] = digits[len-1-i];
+    converted[i] = digits[len-1-i];
   }
-  coverted[len] = '\0';
+  converted[len] = '\0';
 
   if(neg) {
     for(int i = len; i > 0; i++) {
-      converted[i] = conveted[i-1];
+      converted[i] = converted[i-1];
     }
     converted[0] = '-';
   }
