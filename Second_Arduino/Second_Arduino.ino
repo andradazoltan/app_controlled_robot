@@ -32,18 +32,17 @@
 #define OUTMSB_X     0x01
 #define OUTMSB_Y     0x03
 #define OUTMSB_Z     0x05
-#define OUTLSB_Z     0x06
 #define DATA_CFG     0x0E
 #define PL_CFG       0x11
 #define CTRLREG1     0x2A
 #define CTRLREG2     0x2B
 
-float x_accel, y_accel;
-
 char tosend[BUFFER_SIZE];
 char toreceive[BUFFER_SIZE];
 boolean newD = false;
 
+float x_accel, y_accel;
+boolean neg_x, neg_y;
 char xaccel[8]; 
 char yaccel[8];
 
@@ -72,14 +71,18 @@ void setup() {
 void loop() {
   accel_readX();
   accel_readY();
-  convert(xaccel, x_accel<0, abs(x_accel));
-  convert(yaccel, y_accel<0, abs(y_accel));  
-Serial.println(x_accel);
-Serial.println(y_accel);
+
+  neg_x = x_accel<0;
+  neg_y = y_accel<0;
+  
+  convert(xaccel, neg_x, abs(x_accel));
+  convert(yaccel, neg_y, abs(y_accel));  
+  Serial.println(x_accel);
+  Serial.println(y_accel);
   to_write(xaccel);
   lcd_command(SECONDROW);
-  to_write(yaccel);    
-
+  to_write(yaccel);     
+  
   if(newD == true)
     LED_control();
 
@@ -164,9 +167,9 @@ void accel_readX() {
   Wire.endTransmission(false);
 
   Wire.requestFrom(addr, 6);
-  x = Wire.read(); x <<= 8; x |= Wire.read(); x >>= 2;
+   x = Wire.read(); x <<= 8; x |= Wire.read(); x >>= 2; 
 
-  x_accel = (float)x/2058*9.80665F;
+  x_accel = (float)x/4096*9.80665F;
 }
 
 /*
@@ -181,9 +184,9 @@ void accel_readY() {
   Wire.endTransmission(false);
 
   Wire.requestFrom(addr, 6);
-  y = Wire.read(); y <<= 8; y |= Wire.read(); y >>= 2;
+  y = Wire.read(); y <<= 8; y |= Wire.read(); y >>=2; 
 
-  y_accel = (float)y/2048*9.80665F;
+  y_accel = (float)y/4096*9.80665F - 1.0;
 }
 
 /*
@@ -194,25 +197,26 @@ void accel_readY() {
  * Parameter: value - the float value to convert
  */
 void convert(char converted[], boolean neg, float value) {
-  char digits[6];
+  char digits[7];
   int len = 0;
   int rounded = (int)(value *1000);
   
-  while (rounded > 0) {
+  while (rounded > 0 || len <= 4) {
     if(len == 3)
       digits[len++] = '.';
     else {
       digits[len++] = rounded % 10 + '0';
-      value /= 10;
+      rounded /= 10;
     }
   }
+
   for (int i = 0; i < len; i++) {
     converted[i] = digits[len-1-i];
   }
   converted[len] = '\0';
 
   if(neg) {
-    for(int i = len; i > 0; i++) {
+    for(int i = len; i > 0; i--) {
       converted[i] = converted[i-1];
     }
     converted[0] = '-';
@@ -342,7 +346,7 @@ void lcd_init(){
 
   //Print initial banner messages
   delayMicroseconds(1000);
-  char opening[] = "  TURTLE";
+  char opening[] = "     TURTLE";
   to_write(opening);
   
   //Cursor blinking off
