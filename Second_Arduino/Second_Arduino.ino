@@ -1,15 +1,16 @@
 #include <Wire.h>
+#include <SoftwareSerial.h>
 
 //define serial pins
-#define commIN 7
-#define commOUT 4
-#define interruptPin 2
+#define RX 7
+#define TX 4
 #define BUFFER_SIZE 11
+SoftwareSerial comms(RX,TX);
 
 //define LED pins
-#define R 6
-#define G 3
-#define B 5
+#define R A0
+#define G A2
+#define B A1
 
 //define LCD pins
 #define RS 8
@@ -39,7 +40,6 @@
 
 char tosend[BUFFER_SIZE];
 char toreceive[BUFFER_SIZE];
-boolean newD = false;
 
 float x_accel, y_accel;
 boolean neg_x, neg_y;
@@ -49,12 +49,7 @@ char yaccel[8];
 void setup() {
   Wire.begin();
   Serial.begin(9600);
-
-  //Initialize serial pins
-  pinMode(commIN, INPUT);
-  pinMode(commOUT, OUTPUT);
-  pinMode(interruptPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(interruptPin), communication, RISING);
+  comms.begin(9600);
 
   //Initialize LED pins
   pinMode (R, OUTPUT);
@@ -77,14 +72,23 @@ void loop() {
   
   convert(xaccel, neg_x, abs(x_accel));
   convert(yaccel, neg_y, abs(y_accel));  
-  Serial.println(x_accel);
-  Serial.println(y_accel);
-  to_write(xaccel);
-  lcd_command(SECONDROW);
-  to_write(yaccel);     
   
-  if(newD == true)
+  /*to_write(xaccel);
+  lcd_command(SECONDROW);
+  to_write(yaccel);    */
+  
+  if (comms.available()){
+    toreceive[0] = (char)comms.read();
+    int i = 1;
+    while(i < BUFFER_SIZE){
+      if(comms.available()){
+        toreceive[i] = (char)comms.read();
+        i++;
+      }
+    }
     LED_control();
+    to_write(toreceive);
+  }
 
   delay(1000);
   lcdclear();
@@ -106,7 +110,6 @@ void LED_control () {
   analogWrite(R, r);
   analogWrite(G, g);
   analogWrite(B, b);
-  newD = false;
 }
 
 //ACCELEROMETER FUNCTIONS -------------------------------------------
@@ -221,49 +224,6 @@ void convert(char converted[], boolean neg, float value) {
     }
     converted[0] = '-';
   }
-}
-
-//SERIAL COMMUNICATION ISR -------------------------------------------
-/*
- * Interrupt service routine occurs when the master devices wants
- * to communicate with the slave. The master will provide a command
- * about whether it wants data sent or it wants to send data.
- */
-void communication () {
-  digitalWrite(commOUT, HIGH);
-
-  boolean tx = digitalRead(commIN);
-  delayMicroseconds(100); 
-  
-  //SEND TO MASTER
-  if(tx) {
-    for(int i = 0; i < BUFFER_SIZE; i++) {
-      for(int j = 0; j < 8; j++) {
-        if((tosend[i]>>j) & 1)
-          digitalWrite(commOUT, HIGH);
-        else
-          digitalWrite(commOUT, LOW);
-        delayMicroseconds(100);
-      }
-      delayMicroseconds(100);
-    } 
-  }
-  
-  //RECEIVE FROM MASTER
-  else{
-    char temp = 0;
-    for(int i = 0; i < BUFFER_SIZE; i++) {
-      for(int j = 0; j < 8; j++) {
-        delayMicroseconds(100);
-        temp += digitalRead(commIN)<<j;
-      }
-      toreceive[i] = temp;
-      temp = 0;
-      delayMicroseconds(100);
-    }
-    newD = true;
-  } 
-  digitalWrite(commOUT, LOW);
 }
 
 //HIGH LEVEL LCD FUNCTIONS -------------------------------------------
