@@ -7,10 +7,14 @@
 #define WHEELZ_H
 
 // Arduino Motor pins
-#define E1 5
-#define M1 4
-#define E2 6                      
-#define M2 7                 
+#define E1 5           //Left wheel
+#define M1 4           //Left wheel
+#define E2 6           //Right wheel           
+#define M2 7           //Right wheel
+
+// Hall sensor pins
+#define RHALL 2
+#define LHALL 3
 
 // Direction and speed constants
 #define LEFT 1
@@ -29,19 +33,40 @@ void smoothTurn(double radius, int dir, int velociraptor);
 void setDirection(int dir);
 void straight(int velociraptor);
 void halt();
+void calibrateMotor();
 
 // Private variables
 int roboDirection; 
+int currentSpeed;
+double factor = 1.0;
 
 /*
  * Initialize pins and direction of robot.
  */
 void wheel_setup() {
+  int timeTracker = 0;
+  int timesR = 0;
+  int timesL = 0;
 	pinMode(M1, OUTPUT);  
 	pinMode(M2, OUTPUT);
-  pinMode(E1, OUTPUT);
-  pinMode(E2, OUTPUT);
 	roboDirection = FORWARD;
+
+  pinMode(RHALL, INPUT);
+  pinMode(LHALL, INPUT);
+
+  straight(140);
+  while(timeTracker <= 50) {
+    if(digitalRead(RHALL) == HIGH)
+      timesR++;
+    if(digitalRead(LHALL) == HIGH)
+      timesL++;
+
+    delay(100);
+    timeTracker++;
+  }
+
+  factor = (double)timesR/timesL;
+  halt();
 }
 
 /*
@@ -55,7 +80,8 @@ void wheel_reset() {
 
 //set PWM to control speed of wheels
 void setPWM(int velociraptor) {
-	analogWrite(E1, velociraptor);
+  currentSpeed = velociraptor;
+	analogWrite(E1, velociraptor*factor);
 	analogWrite(E2, velociraptor);
 }
 
@@ -85,12 +111,13 @@ void rotate(int dir, int val) {
  *  Parameter: dir - 1 for turn LEFT, 0 for turn RIGHT
  */
 void turn90Deg(int dir){ 
+  boolean currentHstate = digitalRead(LHALL);
+ 
 	digitalWrite(M1, dir);
 	digitalWrite(M2, dir);
-	//may need to change values
-	setPWM(175);
-	delay(600);
-	setPWM(0);
+  setPWM(175); 
+	delay(700);
+	setPWM(0); 
 }
 
 /*
@@ -102,15 +129,15 @@ void turn90Deg(int dir){
  *  Paramter: velociraptor - speed in PWM (0 to 255)
  */
 void smoothTurn(double radius, int dir, int velociraptor){
-    double factor = radius/(radius+20);
+    double factorR = radius/(radius+14);
     digitalWrite(M1, !roboDirection);
     digitalWrite(M2, roboDirection);
     if (dir == LEFT) {
-        analogWrite(E1, factor*velociraptor);
+        analogWrite(E1, factorR*velociraptor);
         analogWrite(E2, velociraptor);
     } 
     else {
-        analogWrite(E2, factor*velociraptor);
+        analogWrite(E2, factorR*velociraptor);
         analogWrite(E1, velociraptor);
     }
 }
@@ -120,9 +147,9 @@ void smoothTurn(double radius, int dir, int velociraptor){
  * Paramter: velociraptor - speed in PWM (0 to 255)
  */
 void straight(int velociraptor) {
-    digitalWrite(M1, !roboDirection);
-    digitalWrite(M2, roboDirection);
-    setPWM(velociraptor);
+  digitalWrite(M1, !roboDirection);
+  digitalWrite(M2, roboDirection);
+  setPWM(velociraptor);
 }
 
 /*

@@ -9,7 +9,7 @@
 #include "wheelZ.h"
 #include "ultrasonic_sensor.h"
 
-//define robot dimension (in cm)
+//define robot radius (in cm)
 #define ROBOT_R 9.5
 
 //define distance variables (in cm)
@@ -19,14 +19,15 @@
 #define DIST_DIFF (THRESHOLD_DIST - UNIFORM_DIST)
 
 //define miscellaneous variables
-#define AVOID_DELAY 10
+#define AVOID_DELAY 5
 
 //function declarations
 void slow_down();
 double check_dist(int pos);
-void turn90(int dir);
 
-int avoid_spd, min_spd;
+//private variables
+int avoid_spd = MAX_PWM/2;
+int min_spd = MAX_PWM/3;
 
 /*
  * Controls the robot to move forward at different speeds until

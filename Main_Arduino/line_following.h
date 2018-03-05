@@ -28,9 +28,6 @@ void calibrate();
 
 //Private variables
 int threshold;
-double curvature;
-int line_spd;
-char state;
 
 /*
  * Function checks if a read value on the photosensor represents
@@ -52,7 +49,7 @@ bool checkBlackOrWhite(int val) {
 void calibrate() {
   int minval = 1024;
   int maxval = 0;
-  rotate(RIGHT, MAX_PWM/3);
+  rotate(RIGHT, MAX_PWM/2);
   
   while (maxval-minval < MIN_DIFF) {
     int val1 = analogRead(IRPIN_L);
