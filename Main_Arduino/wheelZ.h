@@ -1,33 +1,6 @@
 /**
- * CPEN 291 Project 1
- * WHEELZ
- *
- * Usage: 
- * void turn90Deg(int dir); [deprecated]
- * 			Rotates on the spot by 90 degrees
- * 			- dir is the direction. (LEFT, RIGHT)
- * void rotate(int dir, int v);
- * 			Rotates on the spot
- * 			- dir is the direction. (LEFT, RIGHT)
- * 			- v is speed. (0 to 255) in PWM
- * void straight(int v);
- * 			Moves straight
- * 			- v is speed. (0 to 255) in PWM
- * void smoothTurn(double radius, int dir, int v);
- * 			Turns in a circular arc.
- * 			- radius is radius of inner wheel (0cm to large)
- * 			- v is speed of outer wheel. (0 to 255) in PWM
- * 			- dir is direction of turn. (LEFT, RIGHT)
- * void setDirection(int dir);
- * 			flips the direction of movement until setDirection is called again
- * 			- dir is the direction of the movement. (FORWARD, BACKWARD)
- * void slowDown(int dist, int v); // probably BROKEN!
- * 			Slows to a stop in front of the obstacle, no effect if dist > 50cm
- * 			Note: only edits PWM
- * 			- dist is the distance to the obstacle
- * 			- v is the max speed at dist > 50cm. (0 to 255) in PWM
- * void halt();
- *      stops the robot
+ * This file is used to control two motors connected to a 2A
+ * Arduino motor shield. 
  */
 
 #ifndef WHEELZ_H
@@ -46,29 +19,35 @@
 #define BACKWARD 0
 #define MAX_PWM 255
 
-// function declarations
+// Function declarations
 void wheel_setup();
 void wheel_reset();
-
 void setPWM(int velociraptor);
 void rotate(int dir, int val);
 void turn90Deg(int dir);
-void slowDown(int dist);
 void smoothTurn(double radius, int dir, int velociraptor);
 void setDirection(int dir);
 void straight(int velociraptor);
 void halt();
 
-// Direction of the robot
-int roboDirection;
+// Private variables
+int roboDirection; 
 
-// initialize pins and direction
+/*
+ * Initialize pins and direction of robot.
+ */
 void wheel_setup() {
 	pinMode(M1, OUTPUT);  
 	pinMode(M2, OUTPUT);
+  pinMode(E1, OUTPUT);
+  pinMode(E2, OUTPUT);
 	roboDirection = FORWARD;
 }
 
+/*
+ * Reset the direction of the robot and stop robot
+ * from moving.
+ */
 void wheel_reset() {
 	roboDirection = FORWARD;
 	halt();
@@ -80,38 +59,50 @@ void setPWM(int velociraptor) {
 	analogWrite(E2, velociraptor);
 }
 
-// rotate on spot
+/*
+ * Set direction of robot.
+ * Paramter: dir - 1 to move FORWARD, 0 to move BACKWARD
+ */
+void setDirection(int dir) {
+  roboDirection = dir;
+}
+
+/*
+ * Robot is directed to rotate on the spot. Robot will pivot
+ * on its center of gravity.
+ * 
+ * Parameter: dir - 1 for turn LEFT, 0 for turn RIGHT
+ * Parameter: val - speed in PWM (0 to 255)
+ */
 void rotate(int dir, int val) {
   digitalWrite(M1, dir);
   digitalWrite(M2, dir);
   setPWM(val);
 }
 
-//turn LEFT or RIGHT by 90 degrees [deprecated]
+/*
+ *  Robot directed to rotate on the spot by 90 degrees
+ *  Parameter: dir - 1 for turn LEFT, 0 for turn RIGHT
+ */
 void turn90Deg(int dir){ 
 	digitalWrite(M1, dir);
 	digitalWrite(M2, dir);
 	//may need to change values
 	setPWM(175);
-	delay(1000);
+	delay(600);
 	setPWM(0);
 }
 
-// 50cm --> MAX_PWM
-// 10cm --> 0
-void slowDown(int dist, int velociraptor){
-  if (dist > 50) {
-    setPWM(velociraptor);
-  } 
-  else {
-    setPWM(velociraptor * (dist-10) / 40);
-  }
-}
-
-// 0 radius --> (-14)
-// max radius --> "infinity"
+/*
+ *  Robot directed to turn in a circular arc of specified radius at
+ *  a certain speed.
+ *  
+ *  Paramter: radius - radius of inner wheel in cm
+ *  Parameter: dir - 1 for turn LEFT, 0 for turn RIGHT
+ *  Paramter: velociraptor - speed in PWM (0 to 255)
+ */
 void smoothTurn(double radius, int dir, int velociraptor){
-    double factor = radius/(radius+14);
+    double factor = radius/(radius+20);
     digitalWrite(M1, !roboDirection);
     digitalWrite(M2, roboDirection);
     if (dir == LEFT) {
@@ -124,19 +115,19 @@ void smoothTurn(double radius, int dir, int velociraptor){
     }
 }
 
-// sets the direction of the robot 
-// dir = FORWARD or BACKWARD
-void setDirection(int dir) {
-  roboDirection = dir;
-}
-
-//go STRAIGHT
+/*
+ * Robot directed to move straight at a certain speed.
+ * Paramter: velociraptor - speed in PWM (0 to 255)
+ */
 void straight(int velociraptor) {
     digitalWrite(M1, !roboDirection);
     digitalWrite(M2, roboDirection);
     setPWM(velociraptor);
 }
 
+/*
+ * Stop the robot in place from moving.
+ */
 void halt() {
   setPWM(0);
 }

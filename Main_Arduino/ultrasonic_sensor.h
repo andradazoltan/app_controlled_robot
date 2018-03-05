@@ -1,6 +1,7 @@
 /**
- * Ultrasonic sensor stuff, probably convincingly tested
- * CPEN 291
+ * This file controls an ultrasonic sensor attached to a servo motor.
+ * The main purpose of this file to is read the distance on an ultrasonic
+ * sensor at any rotation of the servo motor.
  */
 
 #ifndef ULTRASONIC_H
@@ -15,10 +16,10 @@
 #define TSPIN A2
 
 // Servo constants
-#define SERVO_LEFT 180
-#define SERVO_RIGHT 0
+#define SERVO_LEFT 160
+#define SERVO_RIGHT 20
 #define SERVO_MID 90
-#define SERVO_DELAY 50
+#define SERVO_DELAY 30
 
 // function declarations
 void ultrasonic_setup();

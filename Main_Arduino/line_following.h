@@ -22,82 +22,15 @@
 #define MIN_DIFF 100
 
 //Function declarations
-char follow_line();
 void test_vals();
 bool checkBlackOrWhite(int val);
 void calibrate();
 
+//Private variables
 int threshold;
 double curvature;
 int line_spd;
-
-/*
- * Function loops to continually follow a line of black tape.
- * Robot continues to proceed in this state until it detects 
- * a different state from the Android (via bluetooth).
- * 
- * Returns: character that represents the next state for the
- *        robot to be in
- */
-char follow_line() {
-  wheel_reset();
-  calibrate();
-  curvature = 0;
-  line_spd = MAX_PWM/3;
-
-  while (true) {
-    int left = checkBlackOrWhite(analogRead(IRPIN_L));
-    int right = checkBlackOrWhite(analogRead(IRPIN_R));
-
-    // white black --> turn right
-    if (left == WHITE && right == BLACK) {
-      curvature = max(-MAX_CURV-1, curvature-2);
-      smoothTurn(-MAX_CURV/curvature, RIGHT, line_spd);
-    }
-
-    // black black --> go straight
-    else if (left == BLACK && right == BLACK) {
-      straight(line_spd);
-      curvature = 0;
-    }
-
-    // black white --> turn left
-    else if (left == BLACK && right == WHITE) {
-      curvature = min(MAX_CURV+1, curvature+4);
-      smoothTurn(MAX_CURV/curvature, LEFT, line_spd);
-    }
-
-    // white white --> rotate right
-    else if (curvature < -4) {
-      curvature = -(MAX_CURV+1);
-	    smoothTurn(0, RIGHT, line_spd);
-    }
-
-		// white white --> rotate left
-    else if (curvature > 8) {
-      curvature = MAX_CURV+1;
-		  smoothTurn(0, LEFT, line_spd);
-    }
-
-		// white white, line lost, stop
-		else {
-		  halt();
-			break;
-		}
-
-    delay(LINE_DELAY);
-
-    //Check if state of robot has been changed by phone
-    if (Serial.available()) {
-      char state = Serial.read();
-      while (Serial.available())        //continue reading until the serial buffer clears
-          Serial.read();
-      if (state != 'F')
-        return state;
-    }
-  } 
-}
-
+char state;
 
 /*
  * Function checks if a read value on the photosensor represents
