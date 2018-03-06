@@ -4,7 +4,8 @@
 //define serial pins
 #define RX 7
 #define TX 4
-#define BUFFER_SIZE 11
+#define INTERRUPTPIN 2
+#define BUFFER_SIZE 12
 SoftwareSerial comms(RX,TX);
 
 //define LED pins
@@ -38,18 +39,21 @@ SoftwareSerial comms(RX,TX);
 #define CTRLREG1     0x2A
 #define CTRLREG2     0x2B
 
-char tosend[BUFFER_SIZE];
 char toreceive[BUFFER_SIZE];
 
 float x_accel, y_accel;
 boolean neg_x, neg_y;
 char xaccel[8]; 
 char yaccel[8];
+boolean newD = false;
 
 void setup() {
   Wire.begin();
   Serial.begin(9600);
   comms.begin(9600);
+
+  pinMode(INTERRUPTPIN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(INTERRUPTPIN), communication, RISING);
 
   //Initialize LED pins
   pinMode (R, OUTPUT);
@@ -61,6 +65,7 @@ void setup() {
 
   accel_setup();
   lcd_init();
+  interrupts();
 }
 
 void loop() {
@@ -77,15 +82,7 @@ void loop() {
   lcd_command(SECONDROW);
   to_write(yaccel);    */
   
-  if (comms.available()){
-    toreceive[0] = (char)comms.read();
-    int i = 1;
-    while(i < BUFFER_SIZE){
-      if(comms.available()){
-        toreceive[i] = (char)comms.read();
-        i++;
-      }
-    }
+  if(newD){
     LED_control();
     to_write(toreceive);
   }
@@ -110,6 +107,7 @@ void LED_control () {
   analogWrite(R, r);
   analogWrite(G, g);
   analogWrite(B, b);
+  newD = false;
 }
 
 //ACCELEROMETER FUNCTIONS -------------------------------------------
@@ -226,6 +224,26 @@ void convert(char converted[], boolean neg, float value) {
   }
 }
 
+//SERIAL COMMUNICATION ISR -------------------------------------------
+/*
+ * Interrupt service routine occurs when the master devices wants
+ * to communicate with the slave. The master will provide a command
+ * about whether it wants data sent or it wants to send data.
+ */
+void communication () {
+  while(!comms.available());
+  toreceive[0] = (char)comms.read();
+  int i = 1;
+  
+  while(i < BUFFER_SIZE){
+    if(comms.available()){
+      toreceive[i] = (char)comms.read();
+      i++;
+    }
+  }
+  newD = true;
+}
+
 //HIGH LEVEL LCD FUNCTIONS -------------------------------------------
 /*
  * Function clears what is currently on the LCD display
@@ -275,6 +293,7 @@ void to_write(char data[]) {
  *                            Team L2B-7A
  */
 void lcd_init(){
+  noInterrupts();
   //Initialize all output pins to low
   PORTD &= B11000000;
 
