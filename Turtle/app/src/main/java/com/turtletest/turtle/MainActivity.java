@@ -21,9 +21,12 @@ public class MainActivity extends AppCompatActivity {
 
     //GUI Components
     private LinearLayout mainLayout;
-    private AnimationDrawable animationbg;
+    private AnimationDrawable animationbg;  //Background animation
     private Button bluetoothBtn;
 
+    /* Connect GUI Components with layout, set onclick listeners
+     * @param Bundle savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,11 +42,13 @@ public class MainActivity extends AppCompatActivity {
         animationbg.setExitFadeDuration(2000);
         animationbg.start();
 
+        //Set animation background to run for certain duration once
         long totalDuration = 0;
         for(int i = 0; i< animationbg.getNumberOfFrames();i++){
             totalDuration += animationbg.getDuration(i);
         }
 
+        // timer for animation bg
         Timer timer = new Timer();
 
         //Stop animation when it finishes executing once

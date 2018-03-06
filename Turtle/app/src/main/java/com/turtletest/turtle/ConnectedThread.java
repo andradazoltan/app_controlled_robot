@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /** ConnectedThread class for BluetoothActivity
+ *  Reference from: https://www.codeproject.com/Articles/814814/Android-Connectivity
  */
 
 public class ConnectedThread extends Thread {

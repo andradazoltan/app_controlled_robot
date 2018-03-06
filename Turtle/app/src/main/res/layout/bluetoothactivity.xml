@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-  BluetoothActivity XML Code
-  -->
+<!--BluetoothActivity XML Code-->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 xmlns:tools="http://schemas.android.com/tools"
 android:layout_width="match_parent"
 android:layout_height="match_parent">
+    <!--Child fragment-->
     <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -19,7 +18,9 @@ android:layout_height="match_parent">
     android:paddingLeft="20dp"
     android:paddingRight="20dp"
     android:paddingTop="20dp">
+    <!--Vertical LinearLayout for buttons-->
 <LinearLayout
+    android:id="@+id/btll"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
