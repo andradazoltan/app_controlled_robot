@@ -136,6 +136,9 @@ char manual () {
   } 
 }
 
+#define LEFT_INC 3
+#define RIGHT_INC 6
+
 /*
  * Function loops to continually follow a line of black tape.
  * Robot continues to proceed in this state until it detects 
@@ -148,7 +151,7 @@ char follow_line() {
   wheel_reset();
   calibrate();
   double curvature = 0;
-  int line_spd = MAX_PWM/2;
+  int line_spd = MAX_PWM/2.5;
   char state;
   boolean haltt = false;
   long last_seen = millis();
@@ -157,8 +160,10 @@ char follow_line() {
     if(string[0] == 'L'){
       LED_control ();
     }
-    else if (string[0] != 'F')
+    else if (string[0] != 'F') {
+      halt();
       return string[0];
+    }
     else {
       int left = checkBlackOrWhite(analogRead(IRPIN_L));
       int right = checkBlackOrWhite(analogRead(IRPIN_R));
@@ -166,7 +171,7 @@ char follow_line() {
       // white black --> turn right
       if (left == WHITE && right == BLACK) {
         last_seen = millis();
-        curvature = max(-MAX_CURV-1, curvature-2);
+        curvature = max(-MAX_CURV-1, curvature-LEFT_INC);
         smoothTurn(-MAX_CURV/curvature, RIGHT, line_spd);
       }
   
@@ -180,12 +185,12 @@ char follow_line() {
       // black white --> turn left
       else if (left == BLACK && right == WHITE) {
         last_seen = millis();
-        curvature = min(MAX_CURV+1, curvature+4);
+        curvature = min(MAX_CURV+1, curvature+RIGHT_INC);
         smoothTurn(MAX_CURV/curvature, LEFT, line_spd);
       }
   
       // white white --> rotate right
-      else if (curvature < -4) {
+      else if (curvature < -2*LEFT_INC) {
         if (millis() - last_seen > LOST_DELAY) {
           halt();
         } else {
@@ -195,7 +200,7 @@ char follow_line() {
       }
   
       // white white --> rotate left
-      else if (curvature > 8) {
+      else if (curvature > 2*RIGHT_INC) {
         if (millis() - last_seen > LOST_DELAY) {
           halt();
         } else {

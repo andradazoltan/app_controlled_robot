@@ -54,8 +54,8 @@ void wheel_setup() {
   pinMode(RHALL, INPUT);
   pinMode(LHALL, INPUT);
 
-  straight(140);
-  while(timeTracker <= 50) {
+  straight(MAX_PWM/2);
+  while(timeTracker <= 100) {
     if(digitalRead(RHALL) == HIGH)
       timesR++;
     if(digitalRead(LHALL) == HIGH)
@@ -116,7 +116,7 @@ void turn90Deg(int dir){
 	digitalWrite(M1, dir);
 	digitalWrite(M2, dir);
   setPWM(175); 
-	delay(700);
+	delay(300);
 	setPWM(0); 
 }
 
