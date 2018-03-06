@@ -29,29 +29,6 @@ double check_dist(int pos);
 int avoid_spd = MAX_PWM/2;
 int min_spd = MAX_PWM/3;
 
-/*
- * Controls the robot to move forward at different speeds until
- * it encounters an object. The closer it gets to the object, the robot
- * slows down until a threshold distance is reached.
- */
-void slow_down() {
-  while (true) {
-    double dist = read_dist();
-    if (dist <= STOPPING_DIST) {
-      halt();
-      break;
-    } 
-    else if (dist > THRESHOLD_DIST)
-      straight(avoid_spd);
-    else if (dist < UNIFORM_DIST)
-      straight(min_spd);
-    else
-      straight(min_spd + (avoid_spd - min_spd) * (dist - UNIFORM_DIST) / DIST_DIFF);
-
-    delay(AVOID_DELAY);
-  }
-}
-
 /* 
  * Checks the distance read on the ultrasonic sensor at a specified
  * position of the servo motor.

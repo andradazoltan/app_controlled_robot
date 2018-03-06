@@ -146,6 +146,7 @@ char follow_line() {
   int line_spd = MAX_PWM/2;
   char state;
   boolean haltt = false;
+  long last_seen = millis();
 
   while (true) {
     if(string[0] == 'L')
@@ -158,32 +159,43 @@ char follow_line() {
   
       // white black --> turn right
       if (left == WHITE && right == BLACK) {
+        last_seen = millis();
         curvature = max(-MAX_CURV-1, curvature-2);
         smoothTurn(-MAX_CURV/curvature, RIGHT, line_spd);
       }
   
       // black black --> go straight
       else if (left == BLACK && right == BLACK) {
+        last_seen = millis();
         straight(line_spd);
         curvature = 0;
       }
   
       // black white --> turn left
       else if (left == BLACK && right == WHITE) {
+        last_seen = millis();
         curvature = min(MAX_CURV+1, curvature+4);
         smoothTurn(MAX_CURV/curvature, LEFT, line_spd);
       }
   
       // white white --> rotate right
       else if (curvature < -4) {
-        curvature = -(MAX_CURV+1);
-        smoothTurn(0, RIGHT, line_spd);
+        if (millis() - last_seen > LOST_DELAY) {
+          halt();
+        } else {
+          curvature = -(MAX_CURV+1);
+          smoothTurn(0, RIGHT, line_spd);
+        }
       }
   
       // white white --> rotate left
       else if (curvature > 8) {
-        curvature = MAX_CURV+1;
-        smoothTurn(0, LEFT, line_spd);
+        if (millis() - last_seen > LOST_DELAY) {
+          halt();
+        } else {
+          curvature = MAX_CURV+1;
+          smoothTurn(0, LEFT, line_spd);
+        }
       }
   
       // white white, line lost, stop
@@ -235,7 +247,11 @@ char avoid_obstacles() {
     else if (string[0] != 'O')
       return string[0];
     else {
-      slow_down();
+      char mode_val = slow_down();
+      if (mode_val != 'O') {
+        return mode_val;
+      }
+
       double left_dist = check_dist(SERVO_LEFT);
       double right_dist = check_dist(SERVO_RIGHT);
   
@@ -266,3 +282,52 @@ char avoid_obstacles() {
     }
   }
 }
+
+/*
+ * Part of obstacle avoidance
+ * Controls the robot to move forward at different speeds until
+ * it encounters an object. The closer it gets to the object, the robot
+ * slows down until a threshold distance is reached.
+ */
+char slow_down() {
+  while (true) {
+    double dist = read_dist();
+    if (dist <= STOPPING_DIST) {
+      halt();
+      break;
+    } 
+    else if (dist > THRESHOLD_DIST)
+      straight(avoid_spd);
+    else if (dist < UNIFORM_DIST)
+      straight(min_spd);
+    else
+      straight(min_spd + (avoid_spd - min_spd) * (dist - UNIFORM_DIST) / DIST_DIFF);
+
+    //Check if state of robot has been changed by phone
+    if (Serial.available()) {
+      string[0] = (char)Serial.read();
+      
+      int i = 1;
+      while(true) { 
+        state = 0;
+        if (Serial.available()) {//check if there's any data sent from the remote bluetooth shield
+          state = (char)Serial.read();
+          string[i] = state;
+          i++;
+        }
+        if(state == string[0])
+          break;
+      }
+
+      if (string[0] == 'L')
+        comms.println(string);
+      else if (string[0] != 'O')
+        return string[0];
+    }
+
+    delay(AVOID_DELAY);
+  }
+
+  return 'O';
+}
+
