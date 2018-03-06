@@ -12,11 +12,11 @@
 //Define Serial pins
 #define RX 12
 #define TX 13
+#define INTERRUPTPIN 11
 SoftwareSerial comms (RX,TX);
 
 int BUFFER_SIZE = 11;
-char string[20] = {'L',' ','5','0',' ','5','0',' ','5','0','L','\0'};
-char toreceive[11] = "";
+char string[13] = "";
 boolean start = true;
 char next_state;
 
@@ -24,6 +24,8 @@ void setup() {
   Serial.begin(9600);       //initialize bluetooth
   comms.begin(9600);
 
+  pinMode(INTERRUPTPIN, OUTPUT);
+ 
   wheel_setup();
   ultrasonic_setup();
 }
@@ -49,7 +51,11 @@ void loop() {
     }
 
     if(string[0] == 'L') {
+      string[12] = '\0';
+      digitalWrite(INTERRUPTPIN, HIGH);
+      delayMicroseconds(100);
       comms.println(string);
+      digitalWrite(INTERRUPTPIN, LOW);
       start = true;
     }
     else if(string[0] == 'M')
@@ -102,8 +108,13 @@ char manual () {
     }
     
     //Check if state of robot has been changed by phone
-    if(string[0] == 'L')
+    if(string[0] == 'L'){
+      string[12] = '\0';
+      digitalWrite(INTERRUPTPIN, HIGH);
+      delayMicroseconds(100);
       comms.println(string);
+      digitalWrite(INTERRUPTPIN, LOW);
+    }
     else if (string[0] != 'M') {
       halt();
       return string[0];
@@ -149,8 +160,13 @@ char follow_line() {
   long last_seen = millis();
 
   while (true) {
-    if(string[0] == 'L')
+    if(string[0] == 'L'){
+      string[12] = '\0';
+      digitalWrite(INTERRUPTPIN, HIGH);
+      delayMicroseconds(100);
       comms.println(string);
+      digitalWrite(INTERRUPTPIN, LOW);
+    }
     else if (string[0] != 'F')
       return string[0];
     else {
@@ -242,8 +258,13 @@ char avoid_obstacles() {
   char state;
 
   while (true) {
-    if(string[0] == 'L')
+    if(string[0] == 'L'){
+      string[12] = '\0';
+      digitalWrite(INTERRUPTPIN, HIGH);
+      delayMicroseconds(100);
       comms.println(string);
+      digitalWrite(INTERRUPTPIN, LOW);
+    }
     else if (string[0] != 'O')
       return string[0];
     else {
@@ -290,6 +311,7 @@ char avoid_obstacles() {
  * slows down until a threshold distance is reached.
  */
 char slow_down() {
+  char state;
   while (true) {
     double dist = read_dist();
     if (dist <= STOPPING_DIST) {
@@ -319,10 +341,17 @@ char slow_down() {
           break;
       }
 
-      if (string[0] == 'L')
+      if (string[0] == 'L'){
+        string[12] = '\0';
+        digitalWrite(INTERRUPTPIN, HIGH);
+        delayMicroseconds(100);
         comms.println(string);
-      else if (string[0] != 'O')
+        digitalWrite(INTERRUPTPIN, LOW);
+      }
+      else if (string[0] != 'O') {
+        halt();
         return string[0];
+      }
     }
 
     delay(AVOID_DELAY);

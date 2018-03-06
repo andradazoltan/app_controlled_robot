@@ -20,9 +20,9 @@
 
 //define miscellaneous variables
 #define AVOID_DELAY 5
+#define LOST_DELAY 500
 
 //function declarations
-void slow_down();
 double check_dist(int pos);
 
 //private variables
