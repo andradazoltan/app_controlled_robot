@@ -36,6 +36,9 @@ import java.util.UUID;
 
 /**
  * BluetoothActivity is a parent of all other children.
+ * The user is able to pair to a bluetooth module in this activity.
+ * References: http://mcuhq.com/27/simple-android-bluetooth-application-with-arduino-example
+ *             https://www.codeproject.com/Articles/814814/Android-Connectivity
  */
 
 public class BluetoothActivity extends FragmentActivity{
@@ -43,18 +46,25 @@ public class BluetoothActivity extends FragmentActivity{
     // GUI Components
     private TextView mBluetoothStatus;
     private TextView mReadBuffer;
+
+    //Bluetooth Selection Buttons
     private Button mStart;
     private Button mScanBtn;
     private Button mOffBtn;
     private Button mListPairedDevicesBtn;
     private Button mDiscoverBtn;
+
+    //Bluetooth connection variables
     private BluetoothAdapter mBTAdapter;
     private Set<BluetoothDevice> mPairedDevices;
     private ArrayAdapter<String> mBTArrayAdapter;
     private ListView mDevicesListView;
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
+
+    //Child fragment GUI Components
     private Button startstopBtn;
+    private Button stopBtn;
     private CardView followBtn;
     private CardView obstacleBtn;
 
@@ -83,6 +93,9 @@ public class BluetoothActivity extends FragmentActivity{
     private final static int MESSAGE_READ = 2; // used in bluetooth handler to identify message update
     private final static int CONNECTING_STATUS = 3; // used in bluetooth handler to identify message status
 
+    /* Set up bluetooth connection, find GUI Components
+     * @param Bundle savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +110,7 @@ public class BluetoothActivity extends FragmentActivity{
         mListPairedDevicesBtn = findViewById(R.id.PairedBtn);
         mStart = findViewById(R.id.startbtn);
         startstopBtn = findViewById(R.id.startstopbtn);
+        stopBtn = findViewById(R.id.stopBtn);
 
         //GUI Components for child fragments
         aboutUsButton = findViewById(R.id.aboutusBtn);
@@ -133,6 +147,7 @@ public class BluetoothActivity extends FragmentActivity{
             changeCardVisibility(false, i);
         }
         changeButtonVisibility(false, startstopBtn);
+        changeButtonVisibility(false, stopBtn);
         for (CardView i: actionGUI){
             changeCardVisibility(false, i);
         }
@@ -141,17 +156,17 @@ public class BluetoothActivity extends FragmentActivity{
         fragmentManager = getSupportFragmentManager();
 
         mBTArrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
-        mBTAdapter = BluetoothAdapter.getDefaultAdapter(); // get a handle on the bluetooth radio
+        mBTAdapter = BluetoothAdapter.getDefaultAdapter(); // Get a handle on the bluetooth radio
 
-        mDevicesListView = (ListView)findViewById(R.id.devicesListView);
-        mDevicesListView.setAdapter(mBTArrayAdapter); // assign model to view
+        mDevicesListView = findViewById(R.id.devicesListView);
+        mDevicesListView.setAdapter(mBTArrayAdapter); // Assign model to view
         mDevicesListView.setOnItemClickListener(mDeviceClickListener);
 
         // Ask for location permission if not already allowed
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
 
-
+        //Handler will receive callback notifications; allows Arduino to communicate with app
         mHandler = new Handler(){
             public void handleMessage(android.os.Message msg){
                 if(msg.what == MESSAGE_READ){
@@ -173,53 +188,53 @@ public class BluetoothActivity extends FragmentActivity{
             }
         };
 
+        //Check if connection cannot be made
         if (mBTArrayAdapter == null) {
-            // Device does not support Bluetooth
+            // Device does not support Bluetooth - inform user
             mBluetoothStatus.setText("Status: Bluetooth not found");
             Toast.makeText(getApplicationContext(),"Bluetooth device not found!",Toast.LENGTH_SHORT).show();
         }
         else {
+            //Set onClick listener when the user presses start button
             mStart.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
                     Fragment actionactivity = new ActionActivity();
-
                     fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    //Save view to maintain order of views when user pushes back button
                     fragmentTransaction.replace(android.R.id.content, actionactivity).addToBackStack(null).commit();
 
+                    //Disable visibility of child fragment GUI components
                     for (Button i: btGUI){
                         changeButtonVisibility(false, i);
                     }
-
                     changeButtonVisibility(false, startstopBtn);
-
+                    changeButtonVisibility(false, stopBtn);
                     changeCardVisibility(false, followBtn);
                     changeCardVisibility(false, obstacleBtn);
 
                 }
             });
 
+            //Set onClick listeners of BT GUI Buttons
             mScanBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     bluetoothOn(v);
                 }
             });
-
             mOffBtn.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
                     bluetoothOff(v);
                 }
             });
-
             mListPairedDevicesBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v){
                     listPairedDevices(v);
                 }
             });
-
             mDiscoverBtn.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
@@ -229,10 +244,15 @@ public class BluetoothActivity extends FragmentActivity{
         }
     }
 
+    /* Informs the user if bluetooth is turned on.
+     * @param View view
+     * Reference from: https://www.codeproject.com/Articles/814814/Android-Connectivity
+     */
     private void bluetoothOn(View view){
         if (!mBTAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            //change GUI Components
             mBluetoothStatus.setText("Bluetooth enabled");
             Toast.makeText(getApplicationContext(),"Bluetooth turned on",Toast.LENGTH_SHORT).show();
 
@@ -242,12 +262,20 @@ public class BluetoothActivity extends FragmentActivity{
         }
     }
 
+    /* Getter method for connected bluetooth thread
+     * @return ConnectedThread thread
+     */
     public ConnectedThread getThread(){
         return mConnectedThread;
     }
 
-
-    // Enter here after user selects "yes" or "no" to enabling radio
+    /* Display bluetooth connection status after user selects
+     * option to enable radio
+     * @param int requestCode
+     * @param int resultCode
+     * @param Intent data
+     * Reference from: https://www.codeproject.com/Articles/814814/Android-Connectivity
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent Data){
         // Check which request we're responding to
@@ -262,13 +290,20 @@ public class BluetoothActivity extends FragmentActivity{
                 mBluetoothStatus.setText("Disabled");
         }
     }
-
+    /* Disables bluetooth connections.
+     * @param View view
+     * Reference from: https://www.codeproject.com/Articles/814814/Android-Connectivity
+     */
     private void bluetoothOff(View view){
         mBTAdapter.disable(); // turn off
         mBluetoothStatus.setText("Bluetooth disabled");
         Toast.makeText(getApplicationContext(),"Bluetooth turned Off", Toast.LENGTH_SHORT).show();
     }
 
+    /* Discovers new bluetooth connections.
+     * @param View view
+     * Reference from: https://www.codeproject.com/Articles/814814/Android-Connectivity
+     */
     private void discover(View view){
         // Check if the device is already discovering
         if(mBTAdapter.isDiscovering()){
@@ -301,6 +336,10 @@ public class BluetoothActivity extends FragmentActivity{
         }
     };
 
+    /* Displays list of paired bluetooth connections
+     * @param View view
+     * Reference: https://www.codeproject.com/Articles/814814/Android-Connectivity
+     */
     private void listPairedDevices(View view){
         mPairedDevices = mBTAdapter.getBondedDevices();
         if(mBTAdapter.isEnabled()) {
@@ -314,6 +353,9 @@ public class BluetoothActivity extends FragmentActivity{
             Toast.makeText(getApplicationContext(), "Bluetooth not on", Toast.LENGTH_SHORT).show();
     }
 
+    /* Connects to bluetooth module from available devices.
+     * Reference from: https://www.codeproject.com/Articles/814814/Android-Connectivity
+     */
     private AdapterView.OnItemClickListener mDeviceClickListener = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
 
@@ -369,6 +411,11 @@ public class BluetoothActivity extends FragmentActivity{
         }
     };
 
+    /* Creates Bluetooth Socket
+     * @param BluetoothDevice device
+     * @throws IOException
+     * Reference from: https://www.codeproject.com/Articles/814814/Android-Connectivity
+     */
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
         try {
             final Method m = device.getClass().getMethod("createInsecureRfcommSocketToServiceRecord", UUID.class);
@@ -385,12 +432,13 @@ public class BluetoothActivity extends FragmentActivity{
     public void onBackPressed(){
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             Log.i("MainActivity", "popping backstack");
-            //Restores bluetooth buttons on return
+            //Restores visibility of bluetooth buttons on return
             for (Button i : btGUI){
                 changeButtonVisibility(true, i);
             }
             getSupportFragmentManager().popBackStack();
         } else {
+            //Restore parent view if stack is empty
             Log.i("MainActivity", "nothing on backstack, calling super");
             super.onBackPressed();
         }

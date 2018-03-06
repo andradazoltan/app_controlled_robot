@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">Turtle</string>
-
     <string name="group_name"><b><u>CPEN 291 G17-B</u></b></string>
-    <string name="mode_descriptions"></string>
+    <string name="obstacle_text">Scans for obstacles and avoids collisions.</string>
+    <string name="line_text">Follows course outlined with black tape.</string>
+    <string name="LED_text">Turn on and off LED strips</string>
+    <string name="manual_text">Use your phone as a joystick.</string>
+    <string name="auto_text">Enter automated line following mode.</string>
+    <string name="info_text">Group information.</string>
+    <string name="bt_text">Check connection or pair new device.</string>
 </resources>
