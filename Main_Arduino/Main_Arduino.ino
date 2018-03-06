@@ -1,5 +1,3 @@
-#include <SoftwareSerial.h>
-
 #include "line_following.h"
 #include "obstacle_avoiding.h"
 #include "ultrasonic_sensor.h"
@@ -9,11 +7,10 @@
 #define bRX 0
 #define bTX 1
 
-//Define Serial pins
-#define RX 12
-#define TX 13
-#define INTERRUPTPIN 11
-SoftwareSerial comms (RX,TX);
+//Define LED pins
+#define R 9
+#define G 10
+#define B 11
 
 int BUFFER_SIZE = 11;
 char string[13] = "";
@@ -22,9 +19,10 @@ char next_state;
 
 void setup() {
   Serial.begin(9600);       //initialize bluetooth
-  comms.begin(9600);
 
-  pinMode(INTERRUPTPIN, OUTPUT);
+  pinMode(R, OUTPUT);
+  pinMode(G, OUTPUT);
+  pinMode(B,OUTPUT);
  
   wheel_setup();
   ultrasonic_setup();
@@ -51,11 +49,7 @@ void loop() {
     }
 
     if(string[0] == 'L') {
-      string[12] = '\0';
-      digitalWrite(INTERRUPTPIN, HIGH);
-      delayMicroseconds(100);
-      comms.println(string);
-      digitalWrite(INTERRUPTPIN, LOW);
+      LED_control ();
       start = true;
     }
     else if(string[0] == 'M')
@@ -64,6 +58,8 @@ void loop() {
       next_state = follow_line();
     else if(string[0] == 'O')
       next_state = avoid_obstacles();
+    else
+      start = true;
   }
 
   else {
@@ -76,6 +72,8 @@ void loop() {
     else if(next_state == 'S')
       start = true;
   }
+
+  clearArray(string, 20);
 }
 
 /*
@@ -109,11 +107,7 @@ char manual () {
     
     //Check if state of robot has been changed by phone
     if(string[0] == 'L'){
-      string[12] = '\0';
-      digitalWrite(INTERRUPTPIN, HIGH);
-      delayMicroseconds(100);
-      comms.println(string);
-      digitalWrite(INTERRUPTPIN, LOW);
+      LED_control ();
     }
     else if (string[0] != 'M') {
       halt();
@@ -161,11 +155,7 @@ char follow_line() {
 
   while (true) {
     if(string[0] == 'L'){
-      string[12] = '\0';
-      digitalWrite(INTERRUPTPIN, HIGH);
-      delayMicroseconds(100);
-      comms.println(string);
-      digitalWrite(INTERRUPTPIN, LOW);
+      LED_control ();
     }
     else if (string[0] != 'F')
       return string[0];
@@ -259,11 +249,7 @@ char avoid_obstacles() {
 
   while (true) {
     if(string[0] == 'L'){
-      string[12] = '\0';
-      digitalWrite(INTERRUPTPIN, HIGH);
-      delayMicroseconds(100);
-      comms.println(string);
-      digitalWrite(INTERRUPTPIN, LOW);
+      LED_control ();
     }
     else if (string[0] != 'O')
       return string[0];
@@ -341,12 +327,8 @@ char slow_down() {
           break;
       }
 
-      if (string[0] == 'L'){
-        string[12] = '\0';
-        digitalWrite(INTERRUPTPIN, HIGH);
-        delayMicroseconds(100);
-        comms.println(string);
-        digitalWrite(INTERRUPTPIN, LOW);
+      if (string[0] == 'L'){  
+        LED_control ();
       }
       else if (string[0] != 'O') {
         halt();
@@ -360,3 +342,32 @@ char slow_down() {
   return 'O';
 }
 
+//LED CONTROL --------------------------------------------------------
+/*
+ * Function is called if new LED control data is received from the first
+ * Arduino. The LED PWM pins are then set based on the received values.
+ */
+void LED_control () {
+  int r,g,b;
+  r = (string[2]-'0')*10 + (string[3]-'0');
+  g = (string[5]-'0')*10 + (string[6]-'0');
+  b = (string[8]-'0')*10 + (string[9]-'0');
+
+
+  analogWrite(R, r*255/50);
+  analogWrite(G, g*255/50);
+  analogWrite(B, b*170/50);
+}
+
+/*
+ * Given a character array and lenght of the array,
+ * function clears the array to hold all null characters.
+ * 
+ * Parameter: arr[] - character array to be cleared
+ * Parameter: ln - length of the array
+ */
+void clearArray(char arr[], int ln) {
+  for (int i = 0; i < ln; i++) {
+    arr[i] = '\0';
+  }
+}

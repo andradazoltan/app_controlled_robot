@@ -10,9 +10,9 @@
 #include <Servo.h>
 
 // ultrasonic and servo pins
-#define TRIG 9
-#define ECHO 8
-#define SERVO_PIN 10
+#define TRIG 13
+#define ECHO 12
+#define SERVO_PIN 8
 #define TSPIN A2
 
 // Servo constants
