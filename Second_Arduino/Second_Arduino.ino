@@ -1,17 +1,4 @@
 #include <Wire.h>
-#include <SoftwareSerial.h>
-
-//define serial pins
-#define RX 7
-#define TX 4
-#define INTERRUPTPIN 2
-#define BUFFER_SIZE 12
-SoftwareSerial comms(RX,TX);
-
-//define LED pins
-#define R A0
-#define G A2
-#define B A1
 
 //define LCD pins
 #define RS 8
@@ -39,33 +26,22 @@ SoftwareSerial comms(RX,TX);
 #define CTRLREG1     0x2A
 #define CTRLREG2     0x2B
 
-char toreceive[BUFFER_SIZE];
+
 
 float x_accel, y_accel;
 boolean neg_x, neg_y;
 char xaccel[8]; 
 char yaccel[8];
-boolean newD = false;
 
 void setup() {
   Wire.begin();
   Serial.begin(9600);
-  comms.begin(9600);
-
-  pinMode(INTERRUPTPIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(INTERRUPTPIN), communication, RISING);
-
-  //Initialize LED pins
-  pinMode (R, OUTPUT);
-  pinMode (G, OUTPUT);
-  pinMode (B, OUTPUT);
 
   //Initialize LCD pins 
   DDRB |= B11111111;  
 
   accel_setup();
   lcd_init();
-  interrupts();
 }
 
 void loop() {
@@ -78,37 +54,14 @@ void loop() {
   convert(xaccel, neg_x, abs(x_accel));
   convert(yaccel, neg_y, abs(y_accel));  
   
-  /*to_write(xaccel);
+  to_write(xaccel);
   lcd_command(SECONDROW);
-  to_write(yaccel);    */
-  
-  if(newD){
-    LED_control();
-    to_write(toreceive);
-  }
+  to_write(yaccel); 
 
   delay(1000);
   lcdclear();
 }
 
-
-//LED CONTROL --------------------------------------------------------
-/*
- * Function is called if new LED control data is received from the first
- * Arduino. The LED PWM pins are then set based on the received values.
- */
-void LED_control () {
-  int r,g,b;
-  r = (toreceive[2]-'0')*10 + (toreceive[3]-'0');
-  g = (toreceive[5]-'0')*10 + (toreceive[6]-'0');
-  b = (toreceive[8]-'0')*10 + (toreceive[9]-'0');
-
-
-  analogWrite(R, r);
-  analogWrite(G, g);
-  analogWrite(B, b);
-  newD = false;
-}
 
 //ACCELEROMETER FUNCTIONS -------------------------------------------
 /*
@@ -224,26 +177,6 @@ void convert(char converted[], boolean neg, float value) {
   }
 }
 
-//SERIAL COMMUNICATION ISR -------------------------------------------
-/*
- * Interrupt service routine occurs when the master devices wants
- * to communicate with the slave. The master will provide a command
- * about whether it wants data sent or it wants to send data.
- */
-void communication () {
-  while(!comms.available());
-  toreceive[0] = (char)comms.read();
-  int i = 1;
-  
-  while(i < BUFFER_SIZE){
-    if(comms.available()){
-      toreceive[i] = (char)comms.read();
-      i++;
-    }
-  }
-  newD = true;
-}
-
 //HIGH LEVEL LCD FUNCTIONS -------------------------------------------
 /*
  * Function clears what is currently on the LCD display
@@ -293,7 +226,6 @@ void to_write(char data[]) {
  *                            Team L2B-7A
  */
 void lcd_init(){
-  noInterrupts();
   //Initialize all output pins to low
   PORTD &= B11000000;
 
