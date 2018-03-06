@@ -26,12 +26,15 @@
 #define CTRLREG1     0x2A
 #define CTRLREG2     0x2B
 
-
-
 float x_accel, y_accel;
-boolean neg_x, neg_y;
-char xaccel[8]; 
-char yaccel[8];
+boolean neg_x, neg_y, accel_x, accel_y;
+char xaccel[15] = "x accel:"; 
+char yaccel[15] = "y accel:";
+
+//lcd messages
+char x_msg[] = "Too fast in x!";
+char y_msg[] = "Too fast in y!";
+char slow_msg[] = "SLOW DOWN!";
 
 void setup() {
   Wire.begin();
@@ -48,18 +51,41 @@ void loop() {
   accel_readX();
   accel_readY();
 
+  accel_x = abs(x_accel) > 7;
+  accel_y = abs(y_accel) > 7;
+
   neg_x = x_accel<0;
   neg_y = y_accel<0;
   
   convert(xaccel, neg_x, abs(x_accel));
   convert(yaccel, neg_y, abs(y_accel));  
-  
+ 
   to_write(xaccel);
   lcd_command(SECONDROW);
   to_write(yaccel); 
 
-  delay(1000);
+  delay(2000);
   lcdclear();
+
+  if(accel_x && accel_y){
+    to_write(slow_msg);
+    delay(2000);
+    lcdclear();
+  }
+  else if (accel_x) {
+    to_write(x_msg);
+    lcd_command(SECONDROW);
+    to_write(slow_msg);
+    delay(2000);
+    lcdclear();
+  }
+  else if (accel_y){
+    to_write(y_msg);
+    lcd_command(SECONDROW);
+    to_write(slow_msg);
+    delay(2000);
+    lcdclear();
+  }
 }
 
 
@@ -165,15 +191,15 @@ void convert(char converted[], boolean neg, float value) {
   }
 
   for (int i = 0; i < len; i++) {
-    converted[i] = digits[len-1-i];
+    converted[i+8] = digits[len-1-i];
   }
-  converted[len] = '\0';
+  converted[len + 8] = '\0';
 
   if(neg) {
-    for(int i = len; i > 0; i--) {
+    for(int i = len+8; i > 7; i--) {
       converted[i] = converted[i-1];
     }
-    converted[0] = '-';
+    converted[8] = '-';
   }
 }
 
@@ -259,11 +285,16 @@ void lcd_init(){
   delayMicroseconds(1000);
   char opening[] = "     TURTLE";
   to_write(opening);
+
+  //Change cursor to second row
+  lcd_command(SECONDROW);
+  char opening2[] = "Calibrating.....";
+  to_write(opening2);
   
   //Cursor blinking off
   lcd_command(0xc);
 
-  delay(2000);
+  delay(5000);
   lcdclear();
 }
 
