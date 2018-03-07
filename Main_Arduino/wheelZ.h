@@ -65,7 +65,7 @@ void wheel_setup() {
     timeTracker++;
   }
 
-  factor = (double)timesR/timesL;
+  factor = (double)(timesR)/timesL;
   halt();
 }
 
@@ -116,7 +116,7 @@ void turn90Deg(int dir){
 	digitalWrite(M1, dir);
 	digitalWrite(M2, dir);
   setPWM(175); 
-	delay(300);
+	delay(400);
 	setPWM(0); 
 }
 

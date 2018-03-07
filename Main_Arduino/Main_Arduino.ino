@@ -12,10 +12,14 @@
 #define G 10
 #define B 11
 
+#define LEFT_INC 3
+#define RIGHT_INC 6
+
 int BUFFER_SIZE = 11;
 char string[13] = "";
 boolean start = true;
 char next_state;
+int mode;
 
 void setup() {
   Serial.begin(9600);       //initialize bluetooth
@@ -23,57 +27,92 @@ void setup() {
   pinMode(R, OUTPUT);
   pinMode(G, OUTPUT);
   pinMode(B,OUTPUT);
+  pinMode(A5, INPUT);
  
   wheel_setup();
   ultrasonic_setup();
+
+  readMode();
 }
 
 void loop() { 
-  int i = 1;
-  char state;
-  if(start) {
-    start = false;
-    while(!Serial.available());
-    string[0] = (char)Serial.read();
+  if(mode == 1)
+    avoid_obstacles();
+  else if(mode == 2)
+    follow_line();
+  else
+    bluetoothMode();
+}
 
-    i = 1;
-    while(true) { 
-      state = 0;
-      if (Serial.available()) {//check if there's any data sent from the remote bluetooth shield
-        state = (char)Serial.read();
-        string[i] = state;
-        i++;
+/*
+ * Reads analog input from second Arduino, and value determines the 
+ * mode that robot should be in.
+ *    - mode = 1: OBSTACLE AVOIDANCE
+ *    - mode = 2: LINE FOLLOWING
+ *    - mode = 3: ADDITIONAL FUNCTIONALITY
+ */
+void readMode() {
+  if(analogRead(A5) == 0)
+    mode = 1;
+  else if(analogRead(A5) == 100)
+    mode = 2;
+  else if(analogRead(A5) == 255)
+    mode = 3;
+}
+
+//ADDITIONAL FUNCTIONALITY --------------------------------------------------
+/*
+ * This function loops endlessly, and lets the Android phone control the robot
+ * through a bluetooth moduel.
+ */
+void bluetoothMode() {
+  while (true) {
+    int i = 1;
+    char state;
+    if(start) {
+      start = false;
+      while(!Serial.available());
+      string[0] = (char)Serial.read();
+  
+      i = 1;
+      while(true) { 
+        state = 0;
+        if (Serial.available()) {//check if there's any data sent from the remote bluetooth shield
+          state = (char)Serial.read();
+          string[i] = state;
+          i++;
+        }
+        if(state == string[0])
+          break;
       }
-      if(state == string[0])
-        break;
+  
+      if(string[0] == 'L') {
+        LED_control ();
+        start = true;
+      }
+      else if(string[0] == 'M')
+        next_state = manual();
+      else if(string[0] == 'F')
+        next_state = follow_line();
+      else if(string[0] == 'O')
+        next_state = avoid_obstacles();
+      else
+        start = true;
     }
-
-    if(string[0] == 'L') {
-      LED_control ();
-      start = true;
+  
+    else {
+      if(next_state == 'M')
+        next_state = manual();
+      else if(next_state == 'F')
+        next_state = follow_line();
+      else if(next_state == 'O')
+        next_state = avoid_obstacles();
+      else if(next_state == 'S')
+        start = true;
     }
-    else if(string[0] == 'M')
-      next_state = manual();
-    else if(string[0] == 'F')
-      next_state = follow_line();
-    else if(string[0] == 'O')
-      next_state = avoid_obstacles();
-    else
-      start = true;
+  
+    clearArray(string, 20);
   }
-
-  else {
-    if(next_state == 'M')
-      next_state = manual();
-    else if(next_state == 'F')
-      next_state = follow_line();
-    else if(next_state == 'O')
-      next_state = avoid_obstacles();
-    else if(next_state == 'S')
-      start = true;
-  }
-
-  clearArray(string, 20);
 }
 
 /*
@@ -136,9 +175,36 @@ char manual () {
   } 
 }
 
-#define LEFT_INC 3
-#define RIGHT_INC 6
+/*
+ * Function is called if new LED control data is received from the first
+ * Arduino. The LED PWM pins are then set based on the received values.
+ */
+void LED_control () {
+  int r,g,b;
+  r = (string[2]-'0')*10 + (string[3]-'0');
+  g = (string[5]-'0')*10 + (string[6]-'0');
+  b = (string[8]-'0')*10 + (string[9]-'0');
 
+
+  analogWrite(R, r*255/50);
+  analogWrite(G, g*255/50);
+  analogWrite(B, b*170/50);
+}
+
+/*
+ * Given a character array and lenght of the array,
+ * function clears the array to hold all null characters.
+ * 
+ * Parameter: arr[] - character array to be cleared
+ * Parameter: ln - length of the array
+ */
+void clearArray(char arr[], int ln) {
+  for (int i = 0; i < ln; i++) {
+    arr[i] = '\0';
+  }
+}
+
+//LINE FOLLOWING -----------------------------------------------
 /*
  * Function loops to continually follow a line of black tape.
  * Robot continues to proceed in this state until it detects 
@@ -239,6 +305,7 @@ char follow_line() {
   } 
 }
 
+//OBSTACLE AVOIDANCE ---------------------------------------------------------------
 /*
  * Function loops to continually check for obstacles using an ultrasonic
  * sensor (moved by a servo motor) and maneuver the robot around any found 
@@ -345,34 +412,4 @@ char slow_down() {
   }
 
   return 'O';
-}
-
-//LED CONTROL --------------------------------------------------------
-/*
- * Function is called if new LED control data is received from the first
- * Arduino. The LED PWM pins are then set based on the received values.
- */
-void LED_control () {
-  int r,g,b;
-  r = (string[2]-'0')*10 + (string[3]-'0');
-  g = (string[5]-'0')*10 + (string[6]-'0');
-  b = (string[8]-'0')*10 + (string[9]-'0');
-
-
-  analogWrite(R, r*255/50);
-  analogWrite(G, g*255/50);
-  analogWrite(B, b*170/50);
-}
-
-/*
- * Given a character array and lenght of the array,
- * function clears the array to hold all null characters.
- * 
- * Parameter: arr[] - character array to be cleared
- * Parameter: ln - length of the array
- */
-void clearArray(char arr[], int ln) {
-  for (int i = 0; i < ln; i++) {
-    arr[i] = '\0';
-  }
 }
