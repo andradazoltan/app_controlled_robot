@@ -63,6 +63,7 @@ void readMode() {
     mode = 2;
   else if (digitalRead(S1) == 1)
     mode = 1;
+  delay(2000);
 }
 
 //ADDITIONAL FUNCTIONALITY --------------------------------------------------
