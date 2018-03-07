@@ -37,16 +37,15 @@ void setup() {
  
   wheel_setup();
   ultrasonic_setup();
-
-  readMode();
 }
 
 void loop() { 
+  readMode();
   if(mode == 1)
     avoid_obstacles();
   else if(mode == 2)
     follow_line();
-  else
+  else if(mode == 3)
     bluetoothMode();
 }
 
