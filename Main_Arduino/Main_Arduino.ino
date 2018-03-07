@@ -12,6 +12,11 @@
 #define G 10
 #define B 11
 
+//Define DIP pins
+#define S1 A4
+#define S2 A5
+
+//Define miscellaneous variables
 #define LEFT_INC 3
 #define RIGHT_INC 6
 
@@ -27,7 +32,8 @@ void setup() {
   pinMode(R, OUTPUT);
   pinMode(G, OUTPUT);
   pinMode(B,OUTPUT);
-  pinMode(A5, INPUT);
+  pinMode(S1, INPUT);
+  pinMode(S2, INPUT);
  
   wheel_setup();
   ultrasonic_setup();
@@ -52,12 +58,12 @@ void loop() {
  *    - mode = 3: ADDITIONAL FUNCTIONALITY
  */
 void readMode() {
-  if(analogRead(A5) == 0)
-    mode = 1;
-  else if(analogRead(A5) == 100)
-    mode = 2;
-  else if(analogRead(A5) == 255)
+  if(digitalRead(S1) == 1 && digitalRead(S2) == 1)
     mode = 3;
+  else if (digitalRead(S2) == 1)
+    mode = 2;
+  else if (digitalRead(S1) == 1)
+    mode = 1;
 }
 
 //ADDITIONAL FUNCTIONALITY --------------------------------------------------
