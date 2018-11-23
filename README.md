@@ -1,13 +1,13 @@
 # App Controlled Robot
 
-The purpose of this project was to construct an Arduino-based robot capabale of three functions:
+The purpose of this project was to construct an Arduino-based robot capable of three functions:
 
 * Autonomous line following
 * Autonomous obstacle avoiding
 * Manual app-controlled movement
 
 ## Autonomous Line Following Mode
-To enable line following of inch wide black tape, 2 reflective optical sensors were placed underneath the robot. This enabled us to get two bits of information, for a total of four scenarios. The robot is commanded to move as follows depending on the reading of the sensors:
+To enable line following of inch wide black tape, 2 reflective optical sensors were placed underneath the robot. This enabled us to get two bits of information on the darkness read by the sensors. The robot is commanded to move as follows depending on the reading of the sensors:
 
 * **Dark/Dark:** both sensors are detecting the tape, move straight
 * **Dark/Light:** right sensor is no longer detecting tape, turn left
